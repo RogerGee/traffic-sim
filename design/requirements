@@ -1,0 +1,62 @@
+Project Requirements -*- fill-column:80; mode:text -*-
+--------------------------------------------------------------------------------
+Description
+
+Design a system for simulating traffic at an intersection. It will hopefully
+look better than this:
+
+                          |   |  |
+                          |      |
+                          |   |  |
+                          |      |
+                          |   |  | L
+                          |      | L
+                          | C |  | L
+                   LLLL   | C    |
+---------------------------   |  ---------------------------
+             CC                      CC                    
+- - - - - - - - - - - - - - - + - - - - - - - - - - - - - - 
+                  CC    CC         <TRUCK!>                
+---------------------------   |  ---------------------------
+                        L |      | LLLL
+                        L |   | c|
+                        L |     C|
+                          |   |  |
+                          |      |
+                          |   |  |
+                          |      |
+                          |   |  |
+
+--------------------------------------------------------------------------------
+Basic requirements
+
+1. Cars move at constant speed of 1/2 car length when the light is green.
+
+2. Yellow light: stop if not in intersection yet; continue through intersection
+if already in it
+
+3. Once past intersection, lights aren't applicable.
+
+4. Car needs 6 time cycles to clear intersection.
+
+5. Space for exactly 10 cars before intersection
+
+    - The road can be implemented as a series of discrete steps of 1/2 car
+length.
+
+    - Cars don't require any empty space between them.
+
+    - Yellow lights should last for 6 time steps (for safety)
+--------------------------------------------------------------------------------
+User Input
+
+    - length of red/green lights may be adjusted (not yellow light)
+    - rate of addition of new cars into simulation
+    - length of time to run simulation
+--------------------------------------------------------------------------------
+Output
+
+    - average wait time per car
+    - lowest wait time
+    - longest wait time
+    - average number of waiting cars per time step
