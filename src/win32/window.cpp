@@ -135,14 +135,7 @@ void window::render()
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	// calls to rendering here
-	glBegin(GL_QUADS);
-	{
-		glVertex2f(-0.5,-0.5);
-		glVertex2f(0.5,-0.5);
-		glVertex2f(0.5,0.5);
-		glVertex2f(-0.5,0.5);
-	}
-	glEnd();
+    sim.render();
 	
 	SwapBuffers(hDC);
 }

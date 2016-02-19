@@ -27,6 +27,13 @@ namespace gui
         const int id; // refer to object in window::windows
         GtkWidget* frame; // Gtk widgets...
         GtkWidget* btnSimul;
+        GtkWidget* scaleSimulSpeed;
+        GtkWidget* scaleSpawnRate;
+        GtkWidget* scaleLightSpeed;
+        GtkWidget* dispAvgWaitTime;
+        GtkWidget* dispLowWaitTime;
+        GtkWidget* dispHighWaitTime;
+        GtkWidget* dispAvgWaitCars;
         GtkWidget* drawingArea;
         GtkWidget* box, *drawBox, *controlBox;
         GLXContext context; // OpenGL context

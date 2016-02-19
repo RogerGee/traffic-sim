@@ -20,6 +20,7 @@ namespace trafficsim
         void set_param(simul_param kind,int value);
         void step();
         bool is_running() const { return true; }
+        void render();
     private:
         //cars
         std::vector<vehicle> cars;

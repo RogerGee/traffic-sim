@@ -1,5 +1,6 @@
 // simulation.cpp - trafficsim
 #include "simulation.h"
+#include "opengl.h"
 using namespace std;
 using namespace trafficsim;
 
@@ -29,4 +30,16 @@ void simulation::set_param(simul_param kind,int value)
 void simulation::step()
 {
 
+}
+void simulation::render()
+{
+    //test
+    glBegin(GL_LINE_LOOP);
+    {
+        glVertex2f(-0.5,-0.5);
+        glVertex2f(0.5,-0.5);
+        glVertex2f(0.5,0.5);
+        glVertex2f(-0.5,0.5);
+    }
+    glEnd();
 }

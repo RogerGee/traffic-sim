@@ -1,6 +1,5 @@
 // window.cpp - trafficsim
 #include "window.h"
-#include <iostream>
 #define EDGE_PADDING 10
 using namespace std;
 using namespace gui;
@@ -14,6 +13,9 @@ using namespace trafficsim;
 window::window(GtkApplication* app,int wid)
     : id(wid)
 {
+    GtkGrid* grid;
+    GtkWidget* label;
+
     if (ref++ == 0) {
         static int GLX_VISUAL[] = {
             GLX_RGBA,
@@ -31,15 +33,51 @@ window::window(GtkApplication* app,int wid)
 
     // create and setup Gtk widgets
     frame = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(frame),"trafficsim");
+    gtk_window_set_title(GTK_WINDOW(frame),"Traffic Simulator");
     box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,5);
     drawBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
     controlBox = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
     drawingArea = gtk_drawing_area_new();
     btnSimul = gtk_button_new_with_label("Begin");
+    scaleSimulSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,100,1);
+    scaleSpawnRate = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,100,1);
+    scaleLightSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,100,1);
+    dispAvgWaitTime = gtk_label_new("0.0");
+    dispLowWaitTime = gtk_label_new("0.0");
+    dispHighWaitTime = gtk_label_new("0.0");
+    dispAvgWaitCars = gtk_label_new("0.0");
+    gtk_widget_set_size_request(scaleSimulSpeed,135,-1);
+    gtk_widget_set_size_request(scaleSpawnRate,135,-1);
+    gtk_widget_set_size_request(scaleLightSpeed,135,-1);
+    grid = GTK_GRID(gtk_grid_new());
+    gtk_grid_attach(grid,gtk_label_new("Simulation Speed:"),0,0,1,1);
+    gtk_grid_attach(grid,scaleSimulSpeed,1,0,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Spawn Rate:"),0,1,1,1);
+    gtk_grid_attach(grid,scaleSpawnRate,1,1,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Light Speed:"),0,2,1,1);
+    gtk_grid_attach(grid,scaleLightSpeed,1,2,1,1);
+    gtk_grid_attach(grid,gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),0,3,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Mean Wait Time:"),0,4,1,1);
+    gtk_grid_attach(grid,dispAvgWaitTime,1,4,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Low Wait Time:"),0,5,1,1);
+    gtk_grid_attach(grid,dispLowWaitTime,1,5,1,1);
+    gtk_grid_attach(grid,gtk_label_new("High Wait Time:"),0,6,1,1);
+    gtk_grid_attach(grid,dispHighWaitTime,1,6,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Mean Cars Waiting:"),0,7,1,1);
+    gtk_grid_attach(grid,dispAvgWaitCars,1,7,1,1);
+    for (int i = 0;i < 2;++i) {
+        for (int j = 0;j < 8;++j) {
+            GtkWidget* widget = gtk_grid_get_child_at(grid,i,j);
+            if (widget != NULL)
+                gtk_widget_set_halign(widget,GTK_ALIGN_START);
+        }
+    }
+    gtk_grid_set_column_spacing(grid,10);
     gtk_widget_set_double_buffered(drawingArea,false);
     gtk_box_pack_start(GTK_BOX(drawBox),drawingArea,TRUE,TRUE,0);
+    gtk_box_pack_start(GTK_BOX(controlBox),gtk_label_new("Control Panel"),TRUE,FALSE,0);
     gtk_box_pack_start(GTK_BOX(controlBox),btnSimul,FALSE,FALSE,0);
+    gtk_box_pack_start(GTK_BOX(controlBox),GTK_WIDGET(grid),FALSE,FALSE,0);
     gtk_box_pack_start(GTK_BOX(box),drawBox,TRUE,TRUE,0);
     gtk_box_pack_start(GTK_BOX(box),controlBox,FALSE,FALSE,0);
     g_signal_connect(drawingArea,"configure-event",G_CALLBACK(on_configure_drawarea),this);
@@ -80,6 +118,8 @@ void window::redraw()
 }
 /*static*/ int window::run_application(int argc,char* argv[])
 {
+    // run the application; it will terminate when no more top-level windows
+    // exist (i.e. the use count is at zero)
     int status;
     GtkApplication* app = gtk_application_new("com.trafficsim",G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app,"activate",G_CALLBACK(window::on_app_activate),NULL);
@@ -145,6 +185,7 @@ void window::redraw()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // calls to rendering here
+        win->sim.render();
 
         // present back buffer
         glXSwapBuffers(display,win->handle);
