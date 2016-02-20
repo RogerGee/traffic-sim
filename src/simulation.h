@@ -2,6 +2,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 #include "vehicle.h"
+#include "intersection.h"
 #include <vector>
 
 namespace trafficsim
@@ -9,25 +10,63 @@ namespace trafficsim
 
     enum simul_param
     {
-        simul_steps_param, // number of steps in total simulation
+        simul_steptime_param, // number of seconds for each step
         simul_spawnrate_param, // number of steps new cars added to simulation
-        simul_lightstep_param // number of steps for red/green light duration
+        simul_lightspeed_param // number of steps for red/green light duration
     };
 
-    class simulation {
+    enum simul_statistic
+    {
+        simul_stat_mean_wait_time,
+        simul_stat_low_wait_time,
+        simul_stat_high_wait_time,
+        simul_stat_mean_cars_waiting
+    };
+
+    enum simul_state
+    {
+        simul_state_running,
+        simul_state_paused,
+        simul_state_stopped
+    };
+
+    class simulation
+    {
     public:
         simulation();
+
+        void start();
+        void pause(bool resume = false);
+        void stop();
+        void tick(float tm);
         void set_param(simul_param kind,int value);
-        void step();
-        bool is_running() const { return true; }
         void render();
+
+        int get_param(simul_param kind) const;
+        float get_statistic(simul_statistic stat) const;
+        bool is_running() const
+        { return state == simul_state_running; }
+        simul_state get_state() const
+        { return state; }
     private:
-        //cars
         std::vector<vehicle> cars;
-        //parameters
-        int steps;
-        int curstep;
-        int spawnrate;
+        intersection intr; // one intersection (for now)
+        simul_state state; // state of simulation
+        float stepTime; // how many seconds for each step?
+        int steps; // number of steps into simulation
+        int ticks; // number of ticks in simulation
+        float offset; // fractional offset for animation
+        int spawnrate; // car spawn rate (in steps)
+
+        float elapsedTime; // total elapsed time
+        float waitTime; // total wait time
+        int numCars; // total cars having been in simulation
+        int waitCars; // cars waiting over elapsed time
+        float minWait; // shortest wait time for any car
+        float maxWait; // longest wait time for any car
+
+        void step();
+        void reset();
     };
 
 } // trafficsim

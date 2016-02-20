@@ -32,13 +32,15 @@ LINK = g++ -s
 endif
 
 # targets
-TARGETS = trafficsim window simulation
+TARGETS = trafficsim window simulation light
 OBJS = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(TARGETS)))
 
 # dependencies
 TYPES_H = $(SRC)/types.h
+LIGHT_H = $(SRC)/light.h
 VEHICLE_H = $(SRC)/vehicle.h $(TYPES_H)
-SIMULATION_H = $(SRC)/simulation.h $(VEHICLE_H)
+INTERSECTION_H = $(LIGHT_H) $(TYPES_H)
+SIMULATION_H = $(SRC)/simulation.h $(VEHICLE_H) $(INTERSECTION_H)
 WINDOW_H = $(GTKX)/window.h # all references must provide GTK includes
 
 # rules
@@ -53,6 +55,8 @@ $(OBJDIR)/trafficsim.o: $(SRC)/trafficsim.cpp $(WINDOW_H)
 $(OBJDIR)/window.o: $(GTKX)/window.cpp $(WINDOW_H)
 	$(COMPILE) $(INCLUDE_GTK) -o$@ $<
 $(OBJDIR)/simulation.o: $(SRC)/simulation.cpp $(SIMULATION_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/light.o: $(SRC)/light.cpp $(LIGHT_H)
 	$(COMPILE) -o$@ $<
 
 $(OBJDIR):
