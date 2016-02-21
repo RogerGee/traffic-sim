@@ -2,8 +2,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 #include "simulation.h"
-#include <Windows.h>
-#include <gl/GL.h>
+#include "control.h" // gets Windows/GL system headers
 
 namespace gui
 {
@@ -16,14 +15,12 @@ namespace gui
 		window();
 		~window();
 	
-		HDC hDC;
-		HGLRC hContext;
 		HWND hWnd;
 		trafficsim::simulation sim;
+		DrawArea drawArea;
 		
-		bool update();
+		bool update(float tout);
 		bool message();
-		void render();
 		void config();
 		
 		static int ref;
