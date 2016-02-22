@@ -18,10 +18,14 @@ namespace gui
 		HWND hWnd;
 		trafficsim::simulation sim;
 		DrawArea drawArea;
+		Label lblControlPanel;
+		Button btnSimul, btnPause;
 		
 		bool update(float tout);
 		bool message();
 		void config();
+		void onclick_simul(Control* btn);
+		void onclick_pause(Control* btn);
 		
 		static int ref;
 		static window* singleton;

@@ -14,7 +14,7 @@ using namespace trafficsim;
 
 	ShowWindow(win.hWnd,SW_SHOWNORMAL);
 
-	while (win.update(1 / 60)) {
+	while (win.update(1.0 / 60.0)) {
 		Sleep(ms);
 	}
 
@@ -24,7 +24,8 @@ using namespace trafficsim;
 /*static*/ int window::ref = 0;
 /*static*/ window* window::singleton = NULL;
 window::window()
-	: drawArea(sim)
+	: drawArea(sim), lblControlPanel("Control Panel"), btnSimul("Start",this,&window::onclick_simul),
+		btnPause("Pause",this,&window::onclick_pause)
 {
 	RECT winrect;
 	DWORD dwStyle;
@@ -100,13 +101,49 @@ bool window::message()
 void window::config()
 {
 	RECT rect;
-	int w, h;
+	int w, h, r, s, t, u;
 	GetClientRect(hWnd,&rect);
 	w = rect.right - rect.left;
 	h = rect.bottom - rect.top;
 
 	// make the draw area occupy 3/4 of the client width
-	drawArea.change(0,0,w*3/4,h);
+	w *= 3.0/4;
+	drawArea.change(0,0,w,h);
+
+	w += 5;
+	lblControlPanel.change(w,0); lblControlPanel.get_size(r,s);
+	s += 5;
+	
+	btnSimul.change(w,s); btnSimul.get_size(r,t);
+	btnPause.change(w+r+5,s);
+}
+void window::onclick_simul(Control* btn)
+{
+	if (sim.get_state() == simul_state_running || sim.get_state() == simul_state_paused) {
+		// reset everything
+		sim.stop();
+		btn->set_text("Start");
+		btnPause.set_text("Pause");
+		btnPause.enable(false);
+	}
+	else if (sim.get_state() == simul_state_stopped) {
+		sim.start();
+		btn->set_text("Stop");
+		btnPause.enable(true);
+	}
+	drawArea.render();
+}
+void window::onclick_pause(Control* btn)
+{
+	if (sim.get_state() == simul_state_running) {
+		sim.pause();
+		btn->set_text("Resume");
+	}
+	else if (sim.get_state() == simul_state_paused) {
+		sim.pause(true);
+		btn->set_text("Pause");
+	}
+	drawArea.render();
 }
 /*static*/ VOID window::RegisterWndClass(HINSTANCE hInst)
 {
@@ -129,11 +166,20 @@ void window::config()
 {
 	switch (msg) {
 	case WM_CREATE:
+		// create child controls
 		singleton->drawArea.create(hWnd);
+		singleton->lblControlPanel.create(hWnd);
+		singleton->btnSimul.create(hWnd);
+		singleton->btnPause.create(hWnd);
+		singleton->btnPause.enable(false);
 		break;
 
 	case WM_CLOSE:
 		PostQuitMessage(0);
+		break;
+
+	case WM_COMMAND:
+		Control::wm_command((HWND)lParam,wParam);
 		break;
 
 	case WM_KEYUP:

@@ -1,10 +1,12 @@
 // control.cpp - trafficsim/win32
 #include "control.h"
+#include <Commctrl.h>
 #include <iostream>
 using namespace std;
 using namespace gui;
 using namespace trafficsim;
 
+// I ripped this off SO; it's nice for debugging
 static std::string GetLastErrorAsString()
 {
     //Get the error message, if any.
@@ -24,6 +26,8 @@ static std::string GetLastErrorAsString()
     return message;
 }
 
+// Control
+
 /*static*/ unordered_map<HWND,Control*> Control::inst;
 Control::Control()
 	: hWnd(NULL)
@@ -36,6 +40,16 @@ Control::~Control()
 		DestroyWindow(hWnd);
 	}
 }
+void Control::change(int x,int y)
+{
+	// just change the location
+	SetWindowPos(
+		hWnd,
+		HWND_TOP, // masking this out
+		x, y,
+		0, 0, // masking these out
+		SWP_NOZORDER | SWP_NOSIZE );
+}
 void Control::change(int x,int y,int w,int h)
 {
 	SetWindowPos(
@@ -44,6 +58,47 @@ void Control::change(int x,int y,int w,int h)
 		x, y,
 		w, h,
 		SWP_NOZORDER );
+}
+void Control::change_size(int w,int h)
+{
+	SetWindowPos(
+		hWnd,
+		HWND_TOP, // masking this out
+		0, 0, // masking these out
+		w, h,
+		SWP_NOZORDER | SWP_NOMOVE );
+}
+void Control::get_size(int& w,int& h)
+{
+	RECT bounds;
+	ZeroMemory(&bounds,sizeof(RECT));
+
+	GetClientRect(get_hwnd(),&bounds);
+	w = bounds.right - bounds.left;
+	h = bounds.bottom - bounds.top;
+}
+void Control::set_text(const std::string& text,bool resize)
+{
+	set_text_impl(get_hwnd(),text.c_str(),text.length(),resize);
+}
+void Control::enable(bool enabled)
+{
+	EnableWindow(get_hwnd(),enabled);
+}
+/*static*/ void Control::set_text_impl(HWND hwnd,const char* text,int length,bool resize)
+{
+	HDC hdc;
+	SIZE sz;
+
+	if (resize) {
+		hdc = GetDC(hwnd);
+		GetTextExtentPoint32(hdc,text,length,&sz);
+		sz.cx += 10; sz.cy += 10; // padding
+		SetWindowPos(hwnd,HWND_TOP,0,0,sz.cx,sz.cy,SWP_NOZORDER | SWP_NOMOVE);
+		ReleaseDC(hwnd,hdc);
+	}
+
+	SetWindowText(hwnd,text);
 }
 /*static*/ void Control::add_handle(HWND handle,Control* obj)
 {
@@ -65,6 +120,12 @@ void Control::create(HWND hParent)
 
 	hControl = oncreate(hParent);
 	add_handle(hControl,this);
+}
+/*static*/ void Control::wm_command(HWND hwnd,WPARAM wParam)
+{
+	Control* ctrl = lookup(hwnd);
+	if (ctrl != NULL)
+		ctrl->command(wParam);
 }
 
 // DrawArea
@@ -91,8 +152,6 @@ void DrawArea::render()
 	sim.render();
 
 	SwapBuffers(hDC);
-	
-	cout << "render" << endl;
 }
 HWND DrawArea::oncreate(HWND hParent)
 {
@@ -171,8 +230,6 @@ void DrawArea::config()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glScaled(double(h)/w,1.0,1.0);
-
-	cout << "config" << endl;
 }
 /*static*/ VOID DrawArea::RegisterWndClass()
 {
@@ -222,4 +279,38 @@ void DrawArea::config()
 	}
 
 	return DefWindowProc(hWnd,msg,wParam,lParam);
+}
+
+// Label
+
+Label::Label(const string& initialText)
+	: lblText(initialText)
+{
+}
+HWND Label::oncreate(HWND hParent)
+{
+	HWND hwnd = CreateWindow(WC_STATIC,"",WS_CHILD | WS_VISIBLE,
+			0,0,100,50,hParent,NULL,GetModuleHandle(NULL),NULL);
+	set_text_impl(hwnd,lblText.c_str(),lblText.length(),true);
+
+	return hwnd;
+}
+
+// Button
+
+Button::Button(const std::string& t,window* w,event_handler eh)
+	: lblText(t), win(w), handler(eh)
+{
+}
+HWND Button::oncreate(HWND hParent)
+{
+	HWND hwnd = CreateWindow(WC_BUTTON,"",WS_CHILD | WS_VISIBLE,
+			0,0,100,50,hParent,NULL,GetModuleHandle(NULL),NULL);
+	set_text_impl(hwnd,lblText.c_str(),lblText.length(),true);
+	
+	return hwnd;
+}
+void Button::command(WPARAM wParam)
+{
+	(win->*handler)(this);
 }
