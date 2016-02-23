@@ -3,7 +3,7 @@
 #define SIMULATION_H
 #include "vehicle.h"
 #include "intersection.h"
-#include <vector>
+#include <deque>
 
 namespace trafficsim
 {
@@ -49,7 +49,7 @@ namespace trafficsim
         simul_state get_state() const
         { return state; }
     private:
-        std::vector<vehicle> cars;
+        std::deque<vehicle> cars[4]; //a queue of cars, one queue for each lane
         intersection intr; // one intersection (for now)
         simul_state state; // state of simulation
         float stepTime; // how many seconds for each step?

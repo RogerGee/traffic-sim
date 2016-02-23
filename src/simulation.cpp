@@ -116,7 +116,8 @@ void simulation::step()
 }
 void simulation::reset()
 {
-    cars.clear();
+    for (int i = 0; i < 4; i++)
+		cars[i].clear();
     offset = 0.0;
     ticks = 0;
     steps = 0;
@@ -125,12 +126,15 @@ void simulation::reset()
 void simulation::render()
 {
     //test
-    glBegin(GL_LINE_LOOP);
-    {
-        glVertex2f(-0.5+offset,-0.5);
-        glVertex2f(0.5,-0.5);
-        glVertex2f(0.5-offset,0.5);
-        glVertex2f(-0.5,0.5);
-    }
-    glEnd();
+    // glBegin(GL_LINE_LOOP);
+    // {
+        // glVertex2f(-0.5+offset,-0.5);
+        // glVertex2f(0.5,-0.5);
+        // glVertex2f(0.5-offset,0.5);
+        // glVertex2f(-0.5,0.5);
+    // }
+    // glEnd();
+	glPushMatrix();
+	intr.draw(offset);
+	glPopMatrix();
 }

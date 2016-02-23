@@ -2,8 +2,13 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "types.h"
+
 namespace trafficsim
 {
+
+	//yellow time period is predefined (for now at least)
+	constexpr int YELLOW_TIME = 6;
 
     // light_state: enumerate light states
     enum light_state
@@ -17,12 +22,14 @@ namespace trafficsim
     class light
     {
     public:
-        light();
+        light(int greentime, bool on = true);
 
         light_state get_state() const;
         void step();
+		void draw(point pos, bool vert = true);
     private:
         int step_counter;
+		int green_time;
 
         light(const light&);
         light& operator =(const light&);

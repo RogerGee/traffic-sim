@@ -5,7 +5,7 @@
 namespace trafficsim
 {
 
-    union point
+    struct point
     {
         int x;
         int y;
@@ -16,6 +16,14 @@ namespace trafficsim
         int width;
         int height;
     };
+
+	enum direction
+	{
+		north,
+		east,
+		south,
+		west
+	};
 
 } // trafficsim
 

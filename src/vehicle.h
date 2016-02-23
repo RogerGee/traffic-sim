@@ -14,7 +14,7 @@ namespace trafficsim
         void translate(int cx,int cy);
     private:
         point pos;
-        int width;
+        int legnth;
 
         vehicle(const vehicle&);
         vehicle& operator=(const vehicle&);

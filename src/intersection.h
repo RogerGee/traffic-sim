@@ -3,6 +3,7 @@
 #define INTERSECTION_H
 #include <vector>
 #include "types.h"
+#include "vehicle.h"
 #include "light.h"
 
 namespace trafficsim
@@ -10,16 +11,13 @@ namespace trafficsim
 
     class intersection {
     public:
-        bool checkspace(int x, int y);
-        light* getlight(int x, int y);
-        void move(vehicle* v, int x, int y);
+		intersection();
+		void draw(float delta);
+        light* getlight(direction d, int p);
     private:
         //location and size of intersection
         point loc;
         size sz;
-        //sorted lists of vehicle pointers
-        std::vector<vehicle*> xaxis;
-        std::vector<vehicle*> yaxis;
         //lights
         light ns_light;
         light ew_light;
