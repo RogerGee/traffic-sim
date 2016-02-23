@@ -17,13 +17,13 @@ namespace trafficsim
         int height;
     };
 
-	enum direction
-	{
-		north,
-		east,
-		south,
-		west
-	};
+    enum direction
+    {
+        north,
+        east,
+        south,
+        west
+    };
 
 } // trafficsim
 

@@ -8,7 +8,7 @@ namespace trafficsim
 {
 
     //yellow time period is predefined (for now at least)
-    constexpr int YELLOW_TIME = 6;
+    constexpr int YELLOW_TIME = 8;
 
     // light_state: enumerate light states
     enum light_state
