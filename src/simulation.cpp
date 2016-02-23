@@ -2,11 +2,13 @@
 #include "simulation.h"
 #include "opengl.h"
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 using namespace std;
 using namespace trafficsim;
 
-static const float DEFAULT_STEP_TIME = 2.5;
-static const int DEFAULT_SPAWNRATE = 20;
+static const float DEFAULT_STEP_TIME = 1;
+static const int DEFAULT_SPAWNRATE = 5;
 
 simulation::simulation()
     : state(simul_state_stopped), stepTime(DEFAULT_STEP_TIME),
@@ -14,7 +16,7 @@ simulation::simulation()
       elapsedTime(0.0), waitTime(0.0), numCars(0), waitCars(0),
       minWait(0.0), maxWait(0.0)
 {
-
+    srand(time(NULL));
 }
 void simulation::start()
 {
@@ -93,14 +95,13 @@ float simulation::get_statistic(simul_statistic stat) const
 void simulation::tick(float tm)
 {
     // a game tick has occurred; 'tm' is the amount of time that has occurred
-    // since the last tick; update the tick counter (and possible the step
-    // counter)
+    // since the last tick; update the tick counter (and possibly step)
     if (tm > 0.0) {
         ticks += 1;
 
         // see if we have elapsed one step
         if (offset > 1.0) {
-            steps += 1;
+            step();
             ticks = 0;
             offset = 0.0;
         }
@@ -111,8 +112,41 @@ void simulation::tick(float tm)
 }
 void simulation::step()
 {
+    //increment step counter
+    steps += 1;
+    //add car at rate
+    if (steps % spawnrate == 0)
+        addcar((direction)(rand()%4), 2+(rand()%2));
     // advance the simulation forward by one step
-
+    intr.step();
+    //step in reverse through each lane
+    //make sure each car can move before it tries to
+    for (int j = 0; j < 4; j++)
+        for (int i = cars[j].size()-1; i >= 0; i--)
+            if (cars[j][i].step((direction)j, intr, (i < cars[j].size()-1)
+                ? cars[j][i+1] : vehicle({-1000,-1000}, 0)))
+                cars[j].pop_back();
+        
+}
+void simulation::addcar(direction d, int l)
+{
+    point p;
+    switch (d)
+    {
+    case north:
+        p = {intr.loc.x+2, intr.loc.y-intr.sz.height-20};
+        break;
+    case east:
+        p = {intr.loc.x-20, intr.loc.y-2};
+        break;
+    case south:
+        p = {intr.loc.x, intr.loc.y+20};
+        break;
+    case west:
+        p = {intr.loc.x+intr.sz.width+20, intr.loc.y};
+        break;
+    }
+    cars[d].emplace_front(p, l);
 }
 void simulation::reset()
 {
@@ -135,6 +169,10 @@ void simulation::render()
     // }
     // glEnd();
     glPushMatrix();
-    intr.draw(offset);
+    intr.draw();
+    for (int j = 0; j < 4; j++)
+        for (int i = cars[j].size()-1; i >= 0; i--)
+            cars[j][i].draw((direction)j, offset);
     glPopMatrix();
 }
+

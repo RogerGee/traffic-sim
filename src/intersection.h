@@ -9,11 +9,15 @@
 namespace trafficsim
 {
 
+    class simulation;
+
     class intersection {
     public:
         intersection();
-        void draw(float delta);
+        void step();
+        void draw();
         light* getlight(direction d, int p);
+        friend class simulation;
     private:
         //location and size of intersection
         point loc;

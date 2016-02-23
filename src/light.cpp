@@ -23,7 +23,32 @@ void light::step()
     step_counter = (step_counter + 1) % (green_time*2 + YELLOW_TIME*2);
 }
 
-void draw(point pos, bool vert)
+void light::draw(point pos, bool vert)
 {
-    
+    glColor3f(.4,.4,.4);
+    glBegin(GL_POLYGON);
+        glVertex2d(pos.x, pos.y);
+        glVertex2d(pos.x+1, pos.y);
+        glVertex2d(pos.x+1, pos.y-1);
+        glVertex2d(pos.x, pos.y-1);
+    glEnd();
+    switch(get_state())
+    {
+    case light_state_green:
+        glColor3f(0,1,0);
+        break;
+    case light_state_yellow:
+        glColor3f(1,1,0);
+        break;
+    case light_state_red:
+        glColor3f(1,0,0);
+        break;
+    }
+    glBegin(GL_POLYGON);
+        glVertex2d(pos.x+.1, pos.y-.1);
+        glVertex2d(pos.x+.9, pos.y-.1);
+        glVertex2d(pos.x+.9, pos.y-.9);
+        glVertex2d(pos.x+.1, pos.y-.9);
+    glEnd();
 }
+

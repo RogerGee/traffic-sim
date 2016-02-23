@@ -49,7 +49,7 @@ namespace trafficsim
         simul_state get_state() const
         { return state; }
     private:
-        std::deque<vehicle> cars[4]; //a queue of cars, one queue for each lane
+        std::deque<vehicle> cars[4]; //4 queues of cars, one queue for each lane
         intersection intr; // one intersection (for now)
         simul_state state; // state of simulation
         float stepTime; // how many seconds for each step?
@@ -66,6 +66,7 @@ namespace trafficsim
         float maxWait; // longest wait time for any car
 
         void step();
+        void addcar(direction d, int l);
         void reset();
     };
 
