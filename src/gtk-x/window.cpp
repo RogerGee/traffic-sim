@@ -193,6 +193,9 @@ void window::sync_scales()
         std::forward_as_tuple(GTK_APPLICATION(app),id) /*value*/ ).first->second;
     gtk_widget_show_all(win.frame);
     win.handle = gdk_x11_window_get_xid(gtk_widget_get_window(win.drawingArea));
+
+    // now that we have the X handle for the draw area window, we can configure
+    // the window to render the scene
     win.resize(800,600);
 }
 /*static*/ void window::close_application(GtkApplication* app)

@@ -7,8 +7,8 @@
 namespace trafficsim
 {
 
-	//yellow time period is predefined (for now at least)
-	constexpr int YELLOW_TIME = 6;
+    //yellow time period is predefined (for now at least)
+    constexpr int YELLOW_TIME = 6;
 
     // light_state: enumerate light states
     enum light_state
@@ -26,10 +26,10 @@ namespace trafficsim
 
         light_state get_state() const;
         void step();
-		void draw(point pos, bool vert = true);
+        void draw(point pos, bool vert = true);
     private:
         int step_counter;
-		int green_time;
+        int green_time;
 
         light(const light&);
         light& operator =(const light&);

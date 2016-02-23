@@ -117,7 +117,7 @@ void simulation::step()
 void simulation::reset()
 {
     for (int i = 0; i < 4; i++)
-		cars[i].clear();
+        cars[i].clear();
     offset = 0.0;
     ticks = 0;
     steps = 0;
@@ -134,7 +134,7 @@ void simulation::render()
         // glVertex2f(-0.5,0.5);
     // }
     // glEnd();
-	glPushMatrix();
-	intr.draw(offset);
-	glPopMatrix();
+    glPushMatrix();
+    intr.draw(offset);
+    glPopMatrix();
 }

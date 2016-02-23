@@ -11,8 +11,8 @@ namespace trafficsim
 
     class intersection {
     public:
-		intersection();
-		void draw(float delta);
+        intersection();
+        void draw(float delta);
         light* getlight(direction d, int p);
     private:
         //location and size of intersection
