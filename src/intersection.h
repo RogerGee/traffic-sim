@@ -3,7 +3,6 @@
 #define INTERSECTION_H
 #include <vector>
 #include "types.h"
-#include "vehicle.h"
 #include "light.h"
 
 namespace trafficsim

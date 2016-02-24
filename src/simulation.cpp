@@ -175,4 +175,3 @@ void simulation::render()
             cars[j][i].draw((direction)j, offset);
     glPopMatrix();
 }
-

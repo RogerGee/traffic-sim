@@ -1,5 +1,7 @@
 #include "vehicle.h"
 #include "opengl.h"
+#include <cmath>
+using namespace std;
 using namespace trafficsim;
 
 vehicle::vehicle(point p, int l) : pos(p), prev(p), length(l)
