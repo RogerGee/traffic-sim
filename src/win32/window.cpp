@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <chrono>
+#include <thread>
 #define WNDCLASS_NAME "IHateBeingStuckInTraffic"
 using namespace std;
 using namespace gui;
@@ -10,182 +12,187 @@ using namespace trafficsim;
 
 /*static*/ int window::run_application(int argc,char* argv[])
 {
-	window win;
-	const DWORD ms = 1000/60;
+    using namespace chrono;
+    window win;
 
-	InitCommonControls(); // XP doesn't support InitCommonControlsEx
+    InitCommonControls(); // XP doesn't support InitCommonControlsEx
 
-	ShowWindow(win.hWnd,SW_SHOWNORMAL);
+    ShowWindow(win.hWnd,SW_SHOWNORMAL);
 
-	while (win.update(1.0 / 60.0)) {
-		Sleep(ms);
-	}
+    steady_clock::time_point prev_t = steady_clock::now();
+    steady_clock::time_point cur_t = steady_clock::now();
 
-	return 0;
+    while (win.update(duration_cast<duration<double>>(cur_t-prev_t).count())) {
+        this_thread::sleep_for(milliseconds(4));
+        prev_t = cur_t;
+        cur_t = steady_clock::now();
+    }
+
+    return 0;
 }
 
 /*static*/ int window::ref = 0;
 /*static*/ window* window::singleton = NULL;
 window::window()
-	: drawArea(sim), lblControlPanel("Control Panel"), btnSimul("Start",this,&window::onclick_simul),
-		btnPause("Pause",this,&window::onclick_pause), barSimulSpeed(this,&window::ontrack_simulspeed,50,200),
-		b1("Simulation Speed:"), barSpawnRate(this,&window::ontrack_spawnrate,1,20), b2("Spawn Rate:"),
-		barLightSpeed(this,&window::ontrack_lightspeed,10,20), b3("Light Speed:")
+    : drawArea(sim), lblControlPanel("Control Panel"), btnSimul("Start",this,&window::onclick_simul),
+        btnPause("Pause",this,&window::onclick_pause), barSimulSpeed(this,&window::ontrack_simulspeed,50,400),
+        b1("Simulation Speed:"), barSpawnRate(this,&window::ontrack_spawnrate,1,20), b2("Spawn Rate:"),
+        barLightSpeed(this,&window::ontrack_lightspeed,10,20), b3("Light Speed:")
 {
-	RECT winrect;
-	DWORD dwStyle;
-	HINSTANCE hInst;
+    RECT winrect;
+    DWORD dwStyle;
+    HINSTANCE hInst;
 
-	// make sure that this is the only window instance we produce
-	if (ref++ > 0) {
-		throw runtime_error("window must be a singleton");
-	}
-	singleton = this;
+    // make sure that this is the only window instance we produce
+    if (ref++ > 0) {
+        throw runtime_error("window must be a singleton");
+    }
+    singleton = this;
 
-	hInst = GetModuleHandle(NULL);
-	RegisterWndClass(hInst);
+    hInst = GetModuleHandle(NULL);
+    RegisterWndClass(hInst);
 
-	// adjust desired rectangle for actual needed size
-	winrect.left = 0;
-	winrect.right = 800;
-	winrect.top = 0;
-	winrect.bottom = 600;
-	dwStyle = WS_OVERLAPPEDWINDOW;
-	AdjustWindowRectEx(&winrect,dwStyle,FALSE,WS_EX_CLIENTEDGE);
+    // adjust desired rectangle for actual needed size
+    winrect.left = 0;
+    winrect.right = 800;
+    winrect.top = 0;
+    winrect.bottom = 600;
+    dwStyle = WS_OVERLAPPEDWINDOW;
+    AdjustWindowRectEx(&winrect,dwStyle,FALSE,WS_EX_CLIENTEDGE);
 
-	// create the window
-	hWnd = CreateWindowEx(
-				WS_EX_CLIENTEDGE,
-				WNDCLASS_NAME,
-				"Traffic Simulator :)",
-				dwStyle,
-				CW_USEDEFAULT,
-				CW_USEDEFAULT,
-				winrect.right - winrect.left,
-				winrect.bottom - winrect.top,
-				NULL,
-				NULL,
-				hInst,
-				NULL );
-	if (!hWnd)
-		throw runtime_error("fail CreateWindowEx()");
+    // create the window
+    hWnd = CreateWindowEx(
+                WS_EX_CLIENTEDGE,
+                WNDCLASS_NAME,
+                "Traffic Simulator :)",
+                dwStyle,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                winrect.right - winrect.left,
+                winrect.bottom - winrect.top,
+                NULL,
+                NULL,
+                hInst,
+                NULL );
+    if (!hWnd)
+        throw runtime_error("fail CreateWindowEx()");
 }
 window::~window()
 {
-	DestroyWindow(hWnd);
-	if (--ref <= 0) {
-		UnregisterClass(WNDCLASS_NAME,GetModuleHandle(NULL));
-		singleton = NULL;
-	}
+    DestroyWindow(hWnd);
+    if (--ref <= 0) {
+        UnregisterClass(WNDCLASS_NAME,GetModuleHandle(NULL));
+        singleton = NULL;
+    }
 }
 bool window::update(float tout)
 {
-	if (!message())
-		return false;
+    if (!message())
+        return false;
 
-	if (sim.is_running()) {
-		sim.tick(tout);
-		drawArea.render();
-		update_stats();
-	}
+    if (sim.is_running()) {
+        sim.tick(tout);
+        drawArea.render();
+        update_stats();
+    }
 
-	return true;
+    return true;
 }
 bool window::message()
 {
-	// peek and process messages for any window
-	MSG msg;
-	if (PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
-		if (msg.message == WM_QUIT)
-			return false;
+    // peek and process messages for any window
+    MSG msg;
+    if (PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
+        if (msg.message == WM_QUIT)
+            return false;
 
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	return true;
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return true;
 }
 void window::config()
 {
-	RECT rect;
-	int W, w, h, r, s, t, u;
-	GetClientRect(hWnd,&rect);
-	w = rect.right - rect.left;
-	h = rect.bottom - rect.top;
+    RECT rect;
+    int W, w, h, r, s, t, u;
+    GetClientRect(hWnd,&rect);
+    w = rect.right - rect.left;
+    h = rect.bottom - rect.top;
 
-	// make the draw area occupy 3/4 of the client width
-	W = w;
-	w *= 3.0/4;
-	W -= w;
-	drawArea.change(0,0,w,h);
+    // make the draw area occupy 3/4 of the client width
+    W = w;
+    w *= 3.0/4;
+    W -= w;
+    drawArea.change(0,0,w,h);
 
-	w += 5;
-	lblControlPanel.change(w,0); lblControlPanel.get_size(r,s);
-	u = s;
-	s += 5;
+    w += 5;
+    lblControlPanel.change(w,0); lblControlPanel.get_size(r,s);
+    u = s;
+    s += 5;
 
-	btnSimul.change(w,s); btnSimul.get_size(r,t);
-	btnPause.change(w+r+5,s);
-	s += t+15;
+    btnSimul.change(w,s); btnSimul.get_size(r,t);
+    btnPause.change(w+r+5,s);
+    s += t+15;
 
-	b1.change(w,s,W,t);
-	s += u;
-	barSimulSpeed.change(w,s,W,t*2);
-	s += t*2;
+    b1.change(w,s,W,t);
+    s += u;
+    barSimulSpeed.change(w,s,W,t*2);
+    s += t*2;
 
-	b2.change(w,s,W,t);
-	s += u;
-	barSpawnRate.change(w,s,W,t*2);
-	s += t*2;
+    b2.change(w,s,W,t);
+    s += u;
+    barSpawnRate.change(w,s,W,t*2);
+    s += t*2;
 
-	b3.change(w,s,W,t);
-	s += u;
-	barLightSpeed.change(w,s,W,t*2);
-	s += t*2;
+    b3.change(w,s,W,t);
+    s += u;
+    barLightSpeed.change(w,s,W,t*2);
+    s += t*2;
 }
 void window::onclick_simul(Control* btn)
 {
-	if (sim.get_state() == simul_state_running || sim.get_state() == simul_state_paused) {
-		// reset everything
-		sim.stop();
-		btn->set_text("Start");
-		btnPause.set_text("Pause");
-		btnPause.enable(false);
-		reset_stats();
-		sync_bars();
-	}
-	else if (sim.get_state() == simul_state_stopped) {
-		sim.start();
-		btn->set_text("Stop");
-		btnPause.enable(true);
-	}
-	drawArea.render();
+    if (sim.get_state() == simul_state_running || sim.get_state() == simul_state_paused) {
+        // reset everything
+        sim.stop();
+        btn->set_text("Start");
+        btnPause.set_text("Pause");
+        btnPause.enable(false);
+        reset_stats();
+        sync_bars();
+    }
+    else if (sim.get_state() == simul_state_stopped) {
+        sim.start();
+        btn->set_text("Stop");
+        btnPause.enable(true);
+    }
+    drawArea.render();
 }
 void window::onclick_pause(Control* btn)
 {
-	if (sim.get_state() == simul_state_running) {
-		sim.pause();
-		btn->set_text("Resume");
-	}
-	else if (sim.get_state() == simul_state_paused) {
-		sim.pause(true);
-		btn->set_text("Pause");
-	}
-	drawArea.render();
+    if (sim.get_state() == simul_state_running) {
+        sim.pause();
+        btn->set_text("Resume");
+    }
+    else if (sim.get_state() == simul_state_paused) {
+        sim.pause(true);
+        btn->set_text("Pause");
+    }
+    drawArea.render();
 }
 void window::ontrack_simulspeed(Control* trk)
 {
-	int v = barSimulSpeed.get_value();
-	sim.set_param(simul_steptime_param,v);
+    int v = barSimulSpeed.get_value();
+    sim.set_param(simul_steptime_param,v);
 }
 void window::ontrack_spawnrate(Control* trk)
 {
-	int v = barSpawnRate.get_value();
-	sim.set_param(simul_spawnrate_param,v);
+    int v = barSpawnRate.get_value();
+    sim.set_param(simul_spawnrate_param,v);
 }
 void window::ontrack_lightspeed(Control* trk)
 {
-	int v = barLightSpeed.get_value();
-	sim.set_param(simul_lightspeed_param,v);
+    int v = barLightSpeed.get_value();
+    sim.set_param(simul_lightspeed_param,v);
 }
 void window::sync_bars()
 {
@@ -194,9 +201,9 @@ void window::sync_bars()
     spawnrate = sim.get_param(simul_spawnrate_param);
     lightspeed = sim.get_param(simul_lightspeed_param);
 
-	barSimulSpeed.set_value(steptime);
-	barSpawnRate.set_value(spawnrate);
-	barLightSpeed.set_value(lightspeed);
+    barSimulSpeed.set_value(steptime);
+    barSpawnRate.set_value(spawnrate);
+    barLightSpeed.set_value(lightspeed);
 }
 void window::update_stats()
 {
@@ -222,8 +229,8 @@ void window::reset_stats()
 }
 /*static*/ VOID window::RegisterWndClass(HINSTANCE hInst)
 {
-	WNDCLASS wc;
-	wc.cbClsExtra = 0;
+    WNDCLASS wc;
+    wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hbrBackground = (HBRUSH)GetSysColorBrush(COLOR_BTNFACE);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -237,54 +244,54 @@ void window::reset_stats()
         throw runtime_error("fail RegisterClass()");
 }
 /*static*/ LRESULT CALLBACK window::WindowProc(HWND hWnd,UINT msg,
-										WPARAM wParam,LPARAM lParam)
+                                        WPARAM wParam,LPARAM lParam)
 {
-	switch (msg) {
-	case WM_CREATE:
-		// create child controls
-		singleton->drawArea.create(hWnd);
-		singleton->lblControlPanel.create(hWnd);
-		singleton->btnSimul.create(hWnd);
-		singleton->btnPause.create(hWnd);
-		singleton->btnPause.enable(false);
-		singleton->barSimulSpeed.create(hWnd);
-		singleton->b1.create(hWnd);
-		singleton->barSpawnRate.create(hWnd);
-		singleton->b2.create(hWnd);
-		singleton->barLightSpeed.create(hWnd);
-		singleton->b3.create(hWnd);
+    switch (msg) {
+    case WM_CREATE:
+        // create child controls
+        singleton->drawArea.create(hWnd);
+        singleton->lblControlPanel.create(hWnd);
+        singleton->btnSimul.create(hWnd);
+        singleton->btnPause.create(hWnd);
+        singleton->btnPause.enable(false);
+        singleton->barSimulSpeed.create(hWnd);
+        singleton->b1.create(hWnd);
+        singleton->barSpawnRate.create(hWnd);
+        singleton->b2.create(hWnd);
+        singleton->barLightSpeed.create(hWnd);
+        singleton->b3.create(hWnd);
 
-		singleton->sync_bars();
-		break;
+        singleton->sync_bars();
+        break;
 
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		break;
+    case WM_CLOSE:
+        PostQuitMessage(0);
+        break;
 
-	case WM_COMMAND:
-	case WM_HSCROLL: // for trackbars
-		Control::wm_command((HWND)lParam,wParam);
-		break;
+    case WM_COMMAND:
+    case WM_HSCROLL: // for trackbars
+        Control::wm_command((HWND)lParam,wParam);
+        break;
 
-	case WM_KEYUP:
+    case WM_KEYUP:
 
-		break;
+        break;
 
-	case WM_SIZE:
-		singleton->config();
-		break;
+    case WM_SIZE:
+        singleton->config();
+        break;
 
-	case WM_GETMINMAXINFO:
-	{
-		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-		mmi->ptMinTrackSize.x = 650;
-		mmi->ptMinTrackSize.y = 500;
-		break;
-	}
+    case WM_GETMINMAXINFO:
+    {
+        MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+        mmi->ptMinTrackSize.x = 650;
+        mmi->ptMinTrackSize.y = 500;
+        break;
+    }
 
-	default:
-		return DefWindowProc(hWnd,msg,wParam,lParam);
-	}
+    default:
+        return DefWindowProc(hWnd,msg,wParam,lParam);
+    }
 
-	return 0;
+    return 0;
 }
