@@ -28,6 +28,7 @@ namespace trafficsim
         void step();
         void draw(point pos, bool vert = true);
         void update_rate(int greentime);
+		int get_rate() const;
     private:
         int step_counter;
         int green_time;

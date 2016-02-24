@@ -67,8 +67,7 @@ int simulation::get_param(simul_param kind) const
     case simul_spawnrate_param:
         return spawnrate;
     case simul_lightspeed_param:
-
-        return 0;
+        return intr.ns_light.get_rate();
     }
 
     return -1;
