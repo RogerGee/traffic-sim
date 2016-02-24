@@ -3,3 +3,7 @@ dobj/
 trafficsim
 trafficsim-debug
 TrafficSimulator.exe
+TrafficSimulatorDebug.exe
+resources.res
+*.o
+*.exe

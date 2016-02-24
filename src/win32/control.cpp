@@ -1,6 +1,5 @@
 // control.cpp - trafficsim/win32
 #include "control.h"
-#include <Commctrl.h>
 #include <iostream>
 using namespace std;
 using namespace gui;
@@ -147,7 +146,7 @@ void DrawArea::render()
 {
 	wglMakeCurrent(hDC,hContext);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
 	// calls to rendering here
 	sim.render();
 
@@ -223,7 +222,8 @@ void DrawArea::config()
 	h = bounds.bottom - bounds.top;
 
 	wglMakeCurrent(hDC,hContext);
-	glViewport(EDGE_PADDING,EDGE_PADDING,w-EDGE_PADDING*2,h-EDGE_PADDING*2);
+	w -= EDGE_PADDING*2; h -= EDGE_PADDING*2;
+	glViewport(EDGE_PADDING,EDGE_PADDING,w,h);
 	glClearColor(1.0,1.0,1.0,1.0);
 	glColor3f(0.0,0.0,0.0);
 
@@ -255,7 +255,7 @@ void DrawArea::config()
 	RECT rect;
 	DrawArea* drawArea;
 	drawArea = static_cast<DrawArea*>(lookup(hWnd));
-	
+
 	if (msg == WM_CREATE) {
 		CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
 		drawArea = reinterpret_cast<DrawArea*>(cs->lpCreateParams);
@@ -307,10 +307,44 @@ HWND Button::oncreate(HWND hParent)
 	HWND hwnd = CreateWindow(WC_BUTTON,"",WS_CHILD | WS_VISIBLE,
 			0,0,100,50,hParent,NULL,GetModuleHandle(NULL),NULL);
 	set_text_impl(hwnd,lblText.c_str(),lblText.length(),true);
-	
+
 	return hwnd;
 }
 void Button::command(WPARAM wParam)
+{
+	(win->*handler)(this);
+}
+
+// TrackBar
+
+TrackBar::TrackBar(window* w,event_handler eh,int vmin,int vmax,bool orient)
+	: win(w), handler(eh), mn(vmin), mx(vmax), o(orient)
+{
+}
+void TrackBar::set_value(int v)
+{
+	SendMessage(get_hwnd(),TBM_SETPOS,TRUE,v);
+}
+int TrackBar::get_value() const
+{
+	DWORD dwPos = SendMessage(get_hwnd(),TBM_GETPOS,0,0);
+	return (int)dwPos;
+}
+void TrackBar::set_buddy(Control& ctrl,bool side)
+{
+	SendMessage(get_hwnd(),TBM_SETBUDDY,(WPARAM)side,(LPARAM)ctrl.get_hwnd());
+}
+HWND TrackBar::oncreate(HWND hParent)
+{
+	HWND hwnd = CreateWindow(TRACKBAR_CLASS,"",
+		WS_CHILD|WS_VISIBLE|TBS_ENABLESELRANGE|(o?TBS_HORZ:TBS_VERT),
+		0,0,100,150,hParent,NULL,GetModuleHandle(NULL),NULL);
+
+	// set the range for the trackbar
+	SendMessage(hwnd,TBM_SETRANGE,TRUE,MAKELONG(mn,mx));
+	return hwnd;
+}
+void TrackBar::command(WPARAM wParam)
 {
 	(win->*handler)(this);
 }
