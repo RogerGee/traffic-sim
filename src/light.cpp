@@ -3,7 +3,7 @@
 #include "opengl.h"
 using namespace trafficsim;
 
-light::light(int greentime, bool on) : green_time(greentime), step_counter(0)
+light::light(bool on) : green_time(DEFAULT_LIGHTSPEED()), step_counter(0)
 {
     if (!on)
         step_counter = green_time + YELLOW_TIME;
@@ -35,7 +35,7 @@ void light::draw(point pos, bool vert)
     switch(get_state())
     {
     case light_state_green:
-        glColor3f(0,1,0);
+        glColor3f(0,0.6,0);
         break;
     case light_state_yellow:
         glColor3f(1,1,0);
@@ -45,10 +45,12 @@ void light::draw(point pos, bool vert)
         break;
     }
     glBegin(GL_POLYGON);
+    {
         glVertex2d(pos.x+.1, pos.y-.1);
         glVertex2d(pos.x+.9, pos.y-.1);
         glVertex2d(pos.x+.9, pos.y-.9);
         glVertex2d(pos.x+.1, pos.y-.9);
+    }
     glEnd();
 }
 

@@ -48,7 +48,7 @@ window::window(GtkApplication* app,int wid)
     gtk_widget_set_sensitive(btnPause,FALSE);
     gtk_box_pack_start(GTK_BOX(x[i]),btnSimul,TRUE,TRUE,0);
     gtk_box_pack_start(GTK_BOX(x[i]),btnPause,TRUE,TRUE,0);
-    scaleSimulSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,50,200,1);
+    scaleSimulSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,50,400,1);
     scaleSpawnRate = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,20,1);
     scaleLightSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,10,20,1);
     dispTotalTime = gtk_label_new("0.0");

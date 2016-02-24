@@ -195,6 +195,9 @@ void simulation::reset()
     ticks = 0;
     steps = 0;
     stepTime = DEFAULT_STEP_TIME;
+    spawnrate = DEFAULT_SPAWNRATE;
+    intr.ns_light.update_rate(light::DEFAULT_LIGHTSPEED());
+    intr.ew_light.update_rate(light::DEFAULT_LIGHTSPEED());
 }
 void simulation::render()
 {

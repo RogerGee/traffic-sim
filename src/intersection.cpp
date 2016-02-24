@@ -3,7 +3,7 @@
 #include "opengl.h"
 using namespace trafficsim;
 
-intersection::intersection() : ns_light(8), ew_light(8, false)
+intersection::intersection() : ns_light(), ew_light(false)
 {
     loc.x=0; loc.y=0; sz.width=4; sz.height=4;
 }

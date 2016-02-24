@@ -22,13 +22,16 @@ namespace trafficsim
     class light
     {
     public:
-        light(int greentime, bool on = true);
+        light(bool on = true);
 
         light_state get_state() const;
         void step();
         void draw(point pos, bool vert = true);
         void update_rate(int greentime);
 		int get_rate() const;
+
+        static constexpr int DEFAULT_LIGHTSPEED()
+        { return 10; }
     private:
         int step_counter;
         int green_time;
