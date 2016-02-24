@@ -17,10 +17,13 @@ namespace trafficsim
 
     enum simul_statistic
     {
+        simul_stat_total_time,
         simul_stat_mean_wait_time,
         simul_stat_low_wait_time,
         simul_stat_high_wait_time,
-        simul_stat_mean_cars_waiting
+        simul_stat_mean_cars_waiting,
+        simul_stat_number_of_cars,
+        simul_stat_total_number_of_cars
     };
 
     enum simul_state
@@ -59,14 +62,16 @@ namespace trafficsim
         int spawnrate; // car spawn rate (in steps)
 
         float elapsedTime; // total elapsed time
-        float waitTime; // total wait time
-        int numCars; // total cars having been in simulation
-        int waitCars; // cars waiting over elapsed time
-        float minWait; // shortest wait time for any car
-        float maxWait; // longest wait time for any car
+        float avgWaitTime; // current average wait time
+        float minWait; // shortest wait time seen for any car
+        float maxWait; // longest wait time seen for any car
+        int numCars; // total cars having been in simulation (updated per step)
+        int waitCars; // cars having waited (updated per step)
+        int curNumCars; // current number of cars in simulation
 
         void step();
         void addcar(direction d, int l);
+        void stats_eval(float tm);
         void reset();
     };
 

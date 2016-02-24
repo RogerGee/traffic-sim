@@ -32,7 +32,7 @@ LINK = g++ -s
 endif
 
 # targets
-TARGETS = trafficsim window simulation light intersection vehicle
+TARGETS = trafficsim window simulation light intersection vehicle types
 OBJS = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(TARGETS)))
 
 # dependencies
@@ -62,6 +62,8 @@ $(OBJDIR)/light.o: $(SRC)/light.cpp $(LIGHT_H) $(OPENGL_H)
 $(OBJDIR)/intersection.o: $(SRC)/intersection.cpp $(INTERSECTION_H) $(OPENGL_H)
 	$(COMPILE) -o$@ $<
 $(OBJDIR)/vehicle.o: $(SRC)/vehicle.cpp $(VEHICLE_H) $(OPENGL_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/types.o: $(SRC)/types.cpp $(TYPES_H)
 	$(COMPILE) -o$@ $<
 
 $(OBJDIR):

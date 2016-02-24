@@ -31,10 +31,13 @@ namespace gui
         GtkWidget* scaleSimulSpeed;
         GtkWidget* scaleSpawnRate;
         GtkWidget* scaleLightSpeed;
+        GtkWidget* dispTotalTime;
         GtkWidget* dispAvgWaitTime;
         GtkWidget* dispLowWaitTime;
         GtkWidget* dispHighWaitTime;
         GtkWidget* dispAvgWaitCars;
+        GtkWidget* dispNumberOfCars;
+        GtkWidget* dispTotalCars;
         GtkWidget* drawingArea;
         GtkWidget* box, *drawBox, *controlBox;
         GLXContext context; // OpenGL context
@@ -71,6 +74,9 @@ namespace gui
 
         // this is the main loop for the simulation
         static gboolean loop(window* win);
+
+        // helpers
+        static void adjust_grid_children(GtkGrid* grid,int r,int c);
     };
 
 } // gui

@@ -4,14 +4,21 @@
 using namespace std;
 using namespace trafficsim;
 
-vehicle::vehicle(point p, int l) : pos(p), prev(p), length(l)
+vehicle::vehicle(point p, int l) 
+    : pos(p), prev(p), length(l), tmWait(0.0), tmWaitLast(0.0),
+      tmWaitCycle(0.0)
 {
 }
-
+void vehicle::tick(float tm)
+{
+    if (is_waiting())
+        tmWait += tm;
+}
 bool vehicle::step(direction d, intersection& i, vehicle* next)
 {
-    prev = pos;
     int* pp0, p0;
+    bool stopped = is_waiting();
+    prev = pos;
     switch (d)
     {
     case north:
@@ -43,6 +50,10 @@ bool vehicle::step(direction d, intersection& i, vehicle* next)
         if (l->get_state() != light_state_green)
             return false;
     *pp0 = (d == north || d == east) ? *pp0+1 : *pp0-1;
+    if (stopped) { // we were stopped but are now moving
+        tmWaitCycle = tmWait - tmWaitLast;
+        tmWaitLast = tmWait;
+    }
     return (abs(*pp0) > 50);
 }
 
@@ -68,4 +79,3 @@ void vehicle::draw(direction d, float offs)
     }
     glEnd();
 }
-

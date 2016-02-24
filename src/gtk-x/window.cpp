@@ -18,6 +18,7 @@ window::window(GtkApplication* app,int wid)
     GtkGrid* grid;
     GtkWidget* label;
     GtkWidget* x[10];
+    int i, xc = 0;
 
     if (ref++ == 0) {
         static int GLX_VISUAL[] = {
@@ -41,51 +42,59 @@ window::window(GtkApplication* app,int wid)
     drawBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
     controlBox = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
     drawingArea = gtk_drawing_area_new();
-    x[0] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);
+    x[i = xc++] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);
     btnSimul = gtk_button_new_with_label("Start");
     btnPause = gtk_button_new_with_label("Pause");
     gtk_widget_set_sensitive(btnPause,FALSE);
-    gtk_box_pack_start(GTK_BOX(x[0]),btnSimul,TRUE,TRUE,0);
-    gtk_box_pack_start(GTK_BOX(x[0]),btnPause,TRUE,TRUE,0);
-    scaleSimulSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,50,400,1);
-    scaleSpawnRate = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,100,1);
-    scaleLightSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,100,1);
+    gtk_box_pack_start(GTK_BOX(x[i]),btnSimul,TRUE,TRUE,0);
+    gtk_box_pack_start(GTK_BOX(x[i]),btnPause,TRUE,TRUE,0);
+    scaleSimulSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,50,200,1);
+    scaleSpawnRate = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,1,20,1);
+    scaleLightSpeed = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,10,20,1);
+    dispTotalTime = gtk_label_new("0.0");
     dispAvgWaitTime = gtk_label_new("0.0");
     dispLowWaitTime = gtk_label_new("0.0");
     dispHighWaitTime = gtk_label_new("0.0");
     dispAvgWaitCars = gtk_label_new("0.0");
+    dispNumberOfCars = gtk_label_new("0");
+    dispTotalCars = gtk_label_new("0");
     gtk_widget_set_size_request(scaleSimulSpeed,135,-1);
     gtk_widget_set_size_request(scaleSpawnRate,135,-1);
     gtk_widget_set_size_request(scaleLightSpeed,135,-1);
-    grid = GTK_GRID(gtk_grid_new());
+    x[i = xc++] = gtk_grid_new();
+    grid = GTK_GRID(x[i]);
     gtk_grid_attach(grid,gtk_label_new("Simulation Speed:"),0,0,1,1);
     gtk_grid_attach(grid,scaleSimulSpeed,1,0,1,1);
     gtk_grid_attach(grid,gtk_label_new("Spawn Rate:"),0,1,1,1);
     gtk_grid_attach(grid,scaleSpawnRate,1,1,1,1);
     gtk_grid_attach(grid,gtk_label_new("Light Speed:"),0,2,1,1);
     gtk_grid_attach(grid,scaleLightSpeed,1,2,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Mean Wait Time:"),0,3,1,1);
-    gtk_grid_attach(grid,dispAvgWaitTime,1,3,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Low Wait Time:"),0,4,1,1);
-    gtk_grid_attach(grid,dispLowWaitTime,1,4,1,1);
-    gtk_grid_attach(grid,gtk_label_new("High Wait Time:"),0,5,1,1);
-    gtk_grid_attach(grid,dispHighWaitTime,1,5,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Mean Cars Waiting:"),0,6,1,1);
-    gtk_grid_attach(grid,dispAvgWaitCars,1,6,1,1);
-    for (int i = 0;i < 2;++i) {
-        for (int j = 0;j < 7;++j) {
-            GtkWidget* widget = gtk_grid_get_child_at(grid,i,j);
-            if (widget != NULL)
-                gtk_widget_set_halign(widget,GTK_ALIGN_START);
-        }
-    }
-    gtk_grid_set_column_spacing(grid,10);
+    adjust_grid_children(grid,2,3);
+    x[i = xc++] = gtk_grid_new();
+    grid = GTK_GRID(x[i]);
+    gtk_grid_attach(grid,gtk_label_new("Total Elapsed Time"),0,0,1,1);
+    gtk_grid_attach(grid,dispTotalTime,1,0,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Mean Wait Time:"),0,1,1,1);
+    gtk_grid_attach(grid,dispAvgWaitTime,1,1,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Low Wait Time:"),0,2,1,1);
+    gtk_grid_attach(grid,dispLowWaitTime,1,2,1,1);
+    gtk_grid_attach(grid,gtk_label_new("High Wait Time:"),0,3,1,1);
+    gtk_grid_attach(grid,dispHighWaitTime,1,3,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Mean Cars Waiting:"),0,4,1,1);
+    gtk_grid_attach(grid,dispAvgWaitCars,1,4,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Number of Cars:"),0,5,1,1);
+    gtk_grid_attach(grid,dispNumberOfCars,1,5,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Total Cars Generated:"),0,6,1,1);
+    gtk_grid_attach(grid,dispTotalCars,1,6,1,1);
+    adjust_grid_children(grid,2,7);
     gtk_widget_set_double_buffered(drawingArea,false);
     gtk_box_pack_start(GTK_BOX(drawBox),drawingArea,TRUE,TRUE,0);
     gtk_box_pack_start(GTK_BOX(controlBox),gtk_label_new("Control Panel"),TRUE,FALSE,0);
-    gtk_box_pack_start(GTK_BOX(controlBox),x[0],FALSE,FALSE,0);
-    gtk_box_pack_start(GTK_BOX(controlBox),gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),FALSE,FALSE,5);
-    gtk_box_pack_start(GTK_BOX(controlBox),GTK_WIDGET(grid),FALSE,FALSE,0);
+    for (int it = 0;it < xc;++it) {
+        gtk_box_pack_start(GTK_BOX(controlBox),x[it],FALSE,FALSE,0);
+        if (it+1 < xc)
+            gtk_box_pack_start(GTK_BOX(controlBox),gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),FALSE,FALSE,5);
+    }
     gtk_box_pack_start(GTK_BOX(box),drawBox,TRUE,TRUE,0);
     gtk_box_pack_start(GTK_BOX(box),controlBox,FALSE,FALSE,0);
     g_signal_connect(drawingArea,"configure-event",G_CALLBACK(on_configure_drawarea),this);
@@ -129,7 +138,7 @@ void window::resize(int w,int h)
         gtk_window_iconify(GTK_WINDOW(frame));
     }
     else {
-        gtk_widget_set_size_request(frame,w,h);
+        gtk_window_resize(GTK_WINDOW(frame),w,h);
     }
 }
 void window::redraw()
@@ -151,7 +160,9 @@ void window::update_stats()
 {
     stringstream ss;
     ss.precision(4); ss.flags(ios_base::fixed);
-    ss << sim.get_statistic(simul_stat_mean_wait_time);
+    ss << sim.get_statistic(simul_stat_total_time);
+    gtk_label_set_text(GTK_LABEL(dispTotalTime),ss.str().c_str());
+    ss.str(""); ss << sim.get_statistic(simul_stat_mean_wait_time);
     gtk_label_set_text(GTK_LABEL(dispAvgWaitTime),ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_low_wait_time);
     gtk_label_set_text(GTK_LABEL(dispLowWaitTime),ss.str().c_str());
@@ -159,6 +170,10 @@ void window::update_stats()
     gtk_label_set_text(GTK_LABEL(dispHighWaitTime),ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_mean_cars_waiting);
     gtk_label_set_text(GTK_LABEL(dispAvgWaitCars),ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_number_of_cars));
+    gtk_label_set_text(GTK_LABEL(dispNumberOfCars),ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_total_number_of_cars));
+    gtk_label_set_text(GTK_LABEL(dispTotalCars),ss.str().c_str());
 }
 void window::reset_stats()
 {
@@ -167,10 +182,13 @@ void window::reset_stats()
     ss.precision(4); ss.flags(ios_base::fixed);
     ss << float(0);
     def = ss.str();
+    gtk_label_set_text(GTK_LABEL(dispTotalTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispAvgWaitTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispLowWaitTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispHighWaitTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispAvgWaitCars),def.c_str());
+    gtk_label_set_text(GTK_LABEL(dispNumberOfCars),"0");
+    gtk_label_set_text(GTK_LABEL(dispTotalCars),"0");
 }
 void window::sync_scales()
 {
@@ -196,6 +214,7 @@ void window::sync_scales()
 
     // now that we have the X handle for the draw area window, we can configure
     // the window to render the scene
+    gtk_widget_set_size_request(win.frame,550,300);
     win.resize(800,600);
 }
 /*static*/ void window::close_application(GtkApplication* app)
@@ -318,4 +337,16 @@ void window::sync_scales()
 
     // always run this function (even if it does nothing)
     return TRUE;
+}
+/*static*/ void window::adjust_grid_children(GtkGrid* grid,int r,int c)
+{
+    // set horizontal alignment for grid children
+    for (int i = 0;i < r;++i) {
+        for (int j = 0;j < c;++j) {
+            GtkWidget* widget = gtk_grid_get_child_at(grid,i,j);
+            if (widget != NULL)
+                gtk_widget_set_halign(widget,GTK_ALIGN_START);
+        }
+    }
+    gtk_grid_set_column_spacing(grid,10); // add padding
 }

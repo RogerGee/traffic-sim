@@ -13,8 +13,8 @@ static const int DEFAULT_SPAWNRATE = 5;
 simulation::simulation()
     : state(simul_state_stopped), stepTime(DEFAULT_STEP_TIME),
       steps(0), ticks(0), offset(0.0), spawnrate(DEFAULT_SPAWNRATE),
-      elapsedTime(0.0), waitTime(0.0), numCars(0), waitCars(0),
-      minWait(0.0), maxWait(0.0)
+      elapsedTime(0.0), avgWaitTime(0.0), minWait(0.0), maxWait(0.0),
+      numCars(0), waitCars(0), curNumCars(0)
 {
     srand(time(NULL));
 }
@@ -75,18 +75,22 @@ int simulation::get_param(simul_param kind) const
 float simulation::get_statistic(simul_statistic stat) const
 {
     switch (stat) {
+    case simul_stat_total_time:
+        return elapsedTime;
     case simul_stat_mean_wait_time:
-        if (numCars == 0)
-            return 0.0;
-        return waitTime / numCars;
+        return avgWaitTime;
     case simul_stat_low_wait_time:
         return minWait;
     case simul_stat_high_wait_time:
         return maxWait;
     case simul_stat_mean_cars_waiting:
-        if (elapsedTime == 0.0)
+        if (steps == 0)
             return 0.0;
-        return waitCars / elapsedTime;
+        return float(waitCars) / steps;
+    case simul_stat_number_of_cars:
+        return curNumCars;
+    case simul_stat_total_number_of_cars:
+        return numCars;
     }
 
     return -1.0;
@@ -94,7 +98,19 @@ float simulation::get_statistic(simul_statistic stat) const
 void simulation::tick(float tm)
 {
     // a game tick has occurred; 'tm' is the amount of time that has occurred
-    // since the last tick; update the tick counter (and possibly step)
+    // since the last tick
+
+    // update stats
+    stats_eval(tm);
+
+    // cars store stats about themselves that need to be updated at each tick;
+    // they do not step themselves (we step them when the entire simulation
+    // steps)
+    for (int i = 0;i < 4;++i)
+        for (auto& car : cars[i])
+            car.tick(tm);
+
+    // update the tick counter (and possibly step)
     if (tm > 0.0) {
         ticks += 1;
 
@@ -145,6 +161,31 @@ void simulation::addcar(direction d, int l)
         break;
     }
     cars[d].emplace_front(p, l);
+    numCars += 1;
+}
+void simulation::stats_eval(float tm)
+{
+    // evaluate stats; this is called once per tick
+    int p = 0;
+    elapsedTime += tm;
+    avgWaitTime = 0.0;
+    curNumCars = 0;
+    for (int i = 0;i < 4;++i) {
+        for (auto& car : cars[i]) {
+            float t = car.get_cycle_wait_time();
+            if (t != 0.0 && (t < minWait || minWait == 0.0))
+                minWait = t;
+            if (t > maxWait)
+                maxWait = t;
+            avgWaitTime += car.get_wait_time();
+            p += car.is_waiting();
+            curNumCars += 1;
+        }
+    }
+    if (curNumCars > 0)
+        avgWaitTime /= curNumCars;
+    if (offset == 0.0)
+        waitCars += p;
 }
 void simulation::reset()
 {

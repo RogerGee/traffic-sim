@@ -10,6 +10,8 @@ namespace trafficsim
         int x;
         int y;
     };
+    bool operator==(const point&,const point&);
+    bool operator!=(const point&,const point&);
 
     struct size
     {
