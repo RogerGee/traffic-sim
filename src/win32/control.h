@@ -24,6 +24,8 @@ namespace gui
         void get_size(int& w,int& h);
         void set_text(const std::string& text,bool resize = true);
         void enable(bool enabled);
+        void send_message(UINT message,WPARAM wParam,LPARAM lParam)
+        { SendMessage(hWnd,message,wParam,lParam); }
         static void wm_command(HWND hwnd,WPARAM wParam);
 
         HWND get_hwnd() const

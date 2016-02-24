@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+#include <array>
 #define WNDCLASS_NAME "IHateBeingStuckInTraffic"
 using namespace std;
 using namespace gui;
@@ -76,6 +77,14 @@ window::window()
                 NULL );
     if (!hWnd)
         throw runtime_error("fail CreateWindowEx()");
+
+    // load a font that doesn't look like garbage
+    HFONT hFont;
+    NONCLIENTMETRICS ncm;
+    ncm.cbSize = sizeof(NONCLIENTMETRICS);
+    SystemParametersInfo(SPI_GETNONCLIENTMETRICS,sizeof(NONCLIENTMETRICS),&ncm,0);
+    hFont = CreateFontIndirect(&ncm.lfMessageFont);
+    SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE, 0));
 }
 window::~window()
 {
@@ -286,6 +295,21 @@ void window::reset_stats()
         MINMAXINFO* mmi = (MINMAXINFO*)lParam;
         mmi->ptMinTrackSize.x = 650;
         mmi->ptMinTrackSize.y = 500;
+        break;
+    }
+
+    case WM_SETFONT:
+    {
+        array<Control*,10> a = {
+            &singleton->drawArea, &singleton->lblControlPanel,
+            &singleton->btnSimul, &singleton->btnPause,
+            &singleton->barSimulSpeed, &singleton->b1,
+            &singleton->barSpawnRate, &singleton->b2,
+            &singleton->barLightSpeed, &singleton->b3
+        };
+
+        for (Control* thing : a)
+            thing->send_message(WM_SETFONT,wParam,lParam);
         break;
     }
 
