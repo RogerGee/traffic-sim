@@ -14,7 +14,7 @@ namespace trafficsim
     class vehicle
     {
     public:
-        vehicle(point p, int l);
+        vehicle(point p, int l, color c);
         void tick(float tm);
         bool step(direction d, intersection& i, vehicle* next);
         void draw(direction d, float offs);
@@ -22,6 +22,7 @@ namespace trafficsim
         float get_wait_time() const { return tmWait; }
         float get_cycle_wait_time() const { return tmWaitCycle; }
     private:
+		color clr;
         point pos;
         point prev;
         int length;

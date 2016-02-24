@@ -27,6 +27,10 @@ namespace trafficsim
         west
     };
 
+	struct color {
+		float r, g, b;
+	};
+	
 } // trafficsim
 
 #endif

@@ -4,8 +4,8 @@
 using namespace std;
 using namespace trafficsim;
 
-vehicle::vehicle(point p, int l) 
-    : pos(p), prev(p), length(l), tmWait(0.0), tmWaitLast(0.0),
+vehicle::vehicle(point p, int l, color c) 
+    : pos(p), prev(p), length(l), clr(c), tmWait(0.0), tmWaitLast(0.0),
       tmWaitCycle(0.0)
 {
 }
@@ -56,12 +56,11 @@ bool vehicle::step(direction d, intersection& i, vehicle* next)
     }
     return (abs(*pp0) > 50);
 }
-
 void vehicle::draw(direction d, float offs)
 {
     float x = prev.x + (float(pos.x - prev.x) * offs);
     float y = prev.y + (float(pos.y - prev.y) * offs);
-    glColor3f(1,0,0);
+    glColor3f(clr.r,clr.g,clr.b);
     glBegin(GL_POLYGON);
     if (d == north || d == south)
     {

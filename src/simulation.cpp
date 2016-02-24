@@ -7,6 +7,11 @@
 using namespace std;
 using namespace trafficsim;
 
+float frand()
+{
+	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
+
 static const float DEFAULT_STEP_TIME = 1;
 static const int DEFAULT_SPAWNRATE = 5;
 
@@ -131,7 +136,7 @@ void simulation::step()
     steps += 1;
     //add car at rate
     if (steps % spawnrate == 0)
-        addcar((direction)(rand()%4), 2+(rand()%2));
+        addcar((direction)(rand()%4), 2+(rand()%2), {frand(),frand(),frand()});
     // advance the simulation forward by one step
     intr.step();
     //step in reverse through each lane
@@ -142,7 +147,7 @@ void simulation::step()
                 ? &cars[j][i+1] : NULL))
                 cars[j].pop_back();
 }
-void simulation::addcar(direction d, int l)
+void simulation::addcar(direction d, int l, color c)
 {
     point p;
     switch (d)
@@ -151,16 +156,16 @@ void simulation::addcar(direction d, int l)
         p = {intr.loc.x+2, intr.loc.y-intr.sz.height-20};
         break;
     case east:
-        p = {intr.loc.x-20, intr.loc.y-2};
+        p = {intr.loc.x-20-l, intr.loc.y-2};
         break;
     case south:
         p = {intr.loc.x, intr.loc.y+20+l};
         break;
     case west:
-        p = {intr.loc.x+intr.sz.width+20+l, intr.loc.y};
+        p = {intr.loc.x+intr.sz.width+20, intr.loc.y};
         break;
     }
-    cars[d].emplace_front(p, l);
+    cars[d].emplace_front(p, l, c);
     numCars += 1;
 }
 void simulation::stats_eval(float tm)

@@ -70,7 +70,7 @@ namespace trafficsim
         int curNumCars; // current number of cars in simulation
 
         void step();
-        void addcar(direction d, int l);
+        void addcar(direction d, int l, color c);
         void stats_eval(float tm);
         void reset();
     };
