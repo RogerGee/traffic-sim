@@ -1,3 +1,31 @@
 traffic sim
 --------------------------------------------------------------------------------
 
+This project is a simple traffic simulator with a GUI. The GUI interopts with
+OpenGL to produce graphics. Currently the project supports Microsoft Windows and
+any platform running an X Server with Gtk.
+--------------------------------------------------------------------------------
+Building
+
+[MS Windows] We recommend using either the MinGW compiler or the Microsoft
+Visual C++ compiler. Disclaimer: we have not tested with MSVC++. Some C++11
+features may not be fully implemented by that compiler (unfortunately). To build
+using MinGW, run the build.bat. To build a debug version, which is a console
+application, run 'build debug'. If you have Make installed, run 'build make' to
+run the Windows-specific makefile. Note: the 'makefile' targets Gtk/X but
+'makefile-win32' targets Win32. Optionally you can build the resources file with
+'build res' so that visual styles and icons are enabled.
+
+[Gtk/X] Hopefully your distro has GCC (with g++) installed along with
+GNUMake. To build simply run 'make' from the command-line. You must have Gtk-3.0
+development files that are configurable with pkg-config. Also you need to have
+XLib development files since we interopt with the XServer using Gdk.
+--------------------------------------------------------------------------------
+Using the simulator
+
+The simulator consists of a single 4-lane intersection. Vehicles are represented
+as blocks that move along the lanes. The control panel lets you control the
+simulation as well as see different metrics gathered from the simulation. Once
+you start the simulator, you can pause it with the pause button or reset it by
+clicking 'Stop'. Three scale bars control different parameters to the
+simulation. Their effects take place in real-time.
