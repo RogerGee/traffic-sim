@@ -27,6 +27,7 @@ namespace trafficsim
         light_state get_state() const;
         void step();
         void draw(point pos, bool vert = true);
+        void update_rate(int greentime);
     private:
         int step_counter;
         int green_time;

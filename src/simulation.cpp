@@ -53,8 +53,8 @@ void simulation::set_param(simul_param kind,int value)
         spawnrate = value;
         break;
     case simul_lightspeed_param:
-        // TODO: tell intersection to adjust light duration
-
+        intr.ns_light.update_rate(value);
+        intr.ew_light.update_rate(value);
         break;
     }
 }
@@ -124,9 +124,8 @@ void simulation::step()
     for (int j = 0; j < 4; j++)
         for (int i = cars[j].size()-1; i >= 0; i--)
             if (cars[j][i].step((direction)j, intr, (i < cars[j].size()-1)
-                ? cars[j][i+1] : vehicle({-1000,-1000}, 0)))
+                ? &cars[j][i+1] : NULL))
                 cars[j].pop_back();
-        
 }
 void simulation::addcar(direction d, int l)
 {
@@ -140,10 +139,10 @@ void simulation::addcar(direction d, int l)
         p = {intr.loc.x-20, intr.loc.y-2};
         break;
     case south:
-        p = {intr.loc.x, intr.loc.y+20};
+        p = {intr.loc.x, intr.loc.y+20+l};
         break;
     case west:
-        p = {intr.loc.x+intr.sz.width+20, intr.loc.y};
+        p = {intr.loc.x+intr.sz.width+20+l, intr.loc.y};
         break;
     }
     cars[d].emplace_front(p, l);

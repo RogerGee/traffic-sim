@@ -8,38 +8,41 @@ vehicle::vehicle(point p, int l) : pos(p), prev(p), length(l)
 {
 }
 
-bool vehicle::step(direction d, intersection& i, const vehicle& next)
+bool vehicle::step(direction d, intersection& i, vehicle* next)
 {
     prev = pos;
-    int* pp0, p0, p1;
+    int* pp0, p0;
     switch (d)
     {
     case north:
         pp0 = &pos.y;
         p0 = *pp0;
-        p1 = next.pos.y-next.length-1;
+        if (next && *pp0 > next->pos.y-next->length-2)
+            return false;
         break;
     case east:
         pp0 = &pos.x;
         p0 = *pp0 + length;
-        p1 = next.pos.x-length-1;
+        if (next && *pp0 > next->pos.x-length-2)
+            return false;
         break;
     case south:
         pp0 = &pos.y;
         p0 = *pp0 - length;
-        p1 = next.pos.y+length+1;
+        if (next && *pp0 < next->pos.y+length+2)
+            return false;
         break;
     case west:
         pp0 = &pos.x;
         p0 = *pp0;
-        p1 = next.pos.x+next.length+1;
+        if (next && *pp0 < next->pos.x+next->length+2)
+            return false;
         break;
     }
     if (light* l = i.getlight(d, p0))
         if (l->get_state() != light_state_green)
             return false;
-    if (*pp0 != p1)
-        *pp0 = (d == north || d == east) ? *pp0+1 : *pp0-1;
+    *pp0 = (d == north || d == east) ? *pp0+1 : *pp0-1;
     return (abs(*pp0) > 50);
 }
 

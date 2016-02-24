@@ -15,7 +15,7 @@ namespace trafficsim
     {
     public:
         vehicle(point p, int l);
-        bool step(direction d, intersection& i, const vehicle& next);
+        bool step(direction d, intersection& i, vehicle* next);
         void draw(direction d, float offs);
     private:
         point pos;

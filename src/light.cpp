@@ -52,3 +52,13 @@ void light::draw(point pos, bool vert)
     glEnd();
 }
 
+void light::update_rate(int greentime)
+{
+    if (step_counter > green_time + YELLOW_TIME)
+    {
+        int step = step_counter % (green_time+YELLOW_TIME);
+        step_counter = (greentime+YELLOW_TIME+step) % (greentime*2+YELLOW_TIME*2);
+    }
+    green_time = greentime;
+}
+
