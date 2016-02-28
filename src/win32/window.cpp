@@ -38,7 +38,10 @@ window::window()
     : drawArea(sim), lblControlPanel("Control Panel"), btnSimul("Start",this,&window::onclick_simul),
         btnPause("Pause",this,&window::onclick_pause), barSimulSpeed(this,&window::ontrack_simulspeed,50,400),
         b1("Simulation Speed:"), barSpawnRate(this,&window::ontrack_spawnrate,1,20), b2("Spawn Rate:"),
-        barLightSpeed(this,&window::ontrack_lightspeed,10,20), b3("Light Speed:")
+        barLightSpeed(this,&window::ontrack_lightspeed,10,20), b3("Light Speed:"), l1("Total Elapsed Time:"),
+        lblTotalTime("0.0"), l2("Mean Wait Time"), lblAvgWaitTime("0.0"), l3("Low Wait Time"), lblLowWaitTime("0.0"),
+        l4("High Wait Time:"), lblHighWaitTime("0.0"), l5("Mean Cars Waiting:"), lblAvgWaitCars("0.0"),
+        l6("Number of Cars:"), lblNumberOfCars("0"), l7("Total Cars Generated:"), lblTotalCars("0")
 {
     RECT winrect;
     DWORD dwStyle;
@@ -65,7 +68,7 @@ window::window()
     hWnd = CreateWindowEx(
                 WS_EX_CLIENTEDGE,
                 WNDCLASS_NAME,
-                "Traffic Simulator :)",
+                "Traffic Simulator",
                 dwStyle,
                 CW_USEDEFAULT,
                 CW_USEDEFAULT,
@@ -157,6 +160,27 @@ void window::config()
     s += u;
     barLightSpeed.change(w,s,W,t*2);
     s += t*2;
+
+    l1.change(w,s); l7.get_size(u,t); // l7 has longest text
+    lblTotalTime.change(w+u,s);
+    s += t;
+    l2.change(w,s);
+    lblAvgWaitTime.change(w+u,s);
+    s += t;
+    l3.change(w,s);
+    lblLowWaitTime.change(w+u,s);
+    s += t;
+    l4.change(w,s);
+    lblHighWaitTime.change(w+u,s);
+    s += t;
+    l5.change(w,s);
+    lblAvgWaitCars.change(w+u,s);
+    s += t;
+    l6.change(w,s);
+    lblNumberOfCars.change(w+u,s);
+    s += t;
+    l7.change(w,s);
+    lblTotalCars.change(w+u,s);
 }
 void window::onclick_simul(Control* btn)
 {
@@ -218,14 +242,20 @@ void window::update_stats()
 {
     stringstream ss;
     ss.precision(4); ss.flags(ios_base::fixed);
-    ss << sim.get_statistic(simul_stat_mean_wait_time);
-
+    ss << sim.get_statistic(simul_stat_total_time);
+    lblTotalTime.set_text(ss.str().c_str());
+    ss.str(""); ss << sim.get_statistic(simul_stat_mean_wait_time);
+    lblAvgWaitTime.set_text(ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_low_wait_time);
-
+    lblLowWaitTime.set_text(ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_high_wait_time);
-
+    lblHighWaitTime.set_text(ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_mean_cars_waiting);
-
+    lblAvgWaitCars.set_text(ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_number_of_cars));
+    lblNumberOfCars.set_text(ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_total_number_of_cars));
+    lblTotalCars.set_text(ss.str().c_str());
 }
 void window::reset_stats()
 {
@@ -234,7 +264,13 @@ void window::reset_stats()
     ss.precision(4); ss.flags(ios_base::fixed);
     ss << float(0);
     def = ss.str();
-
+    lblTotalTime.set_text(def.c_str());
+    lblAvgWaitTime.set_text(def.c_str());
+    lblLowWaitTime.set_text(def.c_str());
+    lblHighWaitTime.set_text(def.c_str());
+    lblAvgWaitCars.set_text(def.c_str());
+    lblNumberOfCars.set_text(def.c_str());
+    lblTotalCars.set_text(def.c_str());
 }
 /*static*/ VOID window::RegisterWndClass(HINSTANCE hInst)
 {
@@ -255,21 +291,23 @@ void window::reset_stats()
 /*static*/ LRESULT CALLBACK window::WindowProc(HWND hWnd,UINT msg,
                                         WPARAM wParam,LPARAM lParam)
 {
+    static const array<Control*,24> a = {
+        &singleton->drawArea, &singleton->lblControlPanel, &singleton->btnSimul,
+        &singleton->btnPause, &singleton->barSimulSpeed, &singleton->b1,
+        &singleton->barSpawnRate, &singleton->b2, &singleton->barLightSpeed,
+        &singleton->b3, &singleton->l1, &singleton->lblTotalTime, &singleton->l2,
+        &singleton->lblAvgWaitTime, &singleton->l3, &singleton->lblLowWaitTime,
+        &singleton->l4, &singleton->lblHighWaitTime, &singleton->l5,
+        &singleton->lblAvgWaitCars, &singleton->l6, &singleton->lblNumberOfCars,
+        &singleton->l7, &singleton->lblTotalCars
+    };
+
     switch (msg) {
     case WM_CREATE:
-        // create child controls
-        singleton->drawArea.create(hWnd);
-        singleton->lblControlPanel.create(hWnd);
-        singleton->btnSimul.create(hWnd);
-        singleton->btnPause.create(hWnd);
+        // create child controls and set initial settings
+        for (Control* ctrl : a)
+            ctrl->create(hWnd);
         singleton->btnPause.enable(false);
-        singleton->barSimulSpeed.create(hWnd);
-        singleton->b1.create(hWnd);
-        singleton->barSpawnRate.create(hWnd);
-        singleton->b2.create(hWnd);
-        singleton->barLightSpeed.create(hWnd);
-        singleton->b3.create(hWnd);
-
         singleton->sync_bars();
         break;
 
@@ -282,9 +320,9 @@ void window::reset_stats()
         Control::wm_command((HWND)lParam,wParam);
         break;
 
-    case WM_KEYUP:
+    // case WM_KEYUP:
 
-        break;
+        // break;
 
     case WM_SIZE:
         singleton->config();
@@ -293,25 +331,20 @@ void window::reset_stats()
     case WM_GETMINMAXINFO:
     {
         MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-        mmi->ptMinTrackSize.x = 650;
-        mmi->ptMinTrackSize.y = 500;
+        mmi->ptMinTrackSize.x = 800;
+        mmi->ptMinTrackSize.y = 600;
         break;
     }
 
     case WM_SETFONT:
-    {
-        array<Control*,10> a = {
-            &singleton->drawArea, &singleton->lblControlPanel,
-            &singleton->btnSimul, &singleton->btnPause,
-            &singleton->barSimulSpeed, &singleton->b1,
-            &singleton->barSpawnRate, &singleton->b2,
-            &singleton->barLightSpeed, &singleton->b3
-        };
-
-        for (Control* thing : a)
+        for (Control* thing : a) {
+            char buffer[128];
+            thing->get_text(buffer,sizeof(buffer));
             thing->send_message(WM_SETFONT,wParam,lParam);
+            thing->set_text(buffer);
+        }
+        singleton->config();
         break;
-    }
 
     default:
         return DefWindowProc(hWnd,msg,wParam,lParam);

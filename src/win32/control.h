@@ -22,6 +22,7 @@ namespace gui
         void change(int x,int y,int w,int h);
         void change_size(int w,int h);
         void get_size(int& w,int& h);
+        char* get_text(char* buffer,size_t size);
         void set_text(const std::string& text,bool resize = true);
         void enable(bool enabled);
         void send_message(UINT message,WPARAM wParam,LPARAM lParam)

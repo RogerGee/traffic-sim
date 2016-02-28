@@ -72,7 +72,7 @@ window::window(GtkApplication* app,int wid)
     adjust_grid_children(grid,2,3);
     x[i = xc++] = gtk_grid_new();
     grid = GTK_GRID(x[i]);
-    gtk_grid_attach(grid,gtk_label_new("Total Elapsed Time"),0,0,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Total Elapsed Time:"),0,0,1,1);
     gtk_grid_attach(grid,dispTotalTime,1,0,1,1);
     gtk_grid_attach(grid,gtk_label_new("Mean Wait Time:"),0,1,1,1);
     gtk_grid_attach(grid,dispAvgWaitTime,1,1,1,1);

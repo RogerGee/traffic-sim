@@ -1,0 +1,73 @@
+################################################################################
+# Makefile for 'traffic-sim' for Win32 #########################################
+################################################################################
+.PHONY: debug clean
+
+ifeq ($(MAKECMDGOALS),debug)
+MAKE_DEBUG = yes
+endif
+
+# options
+SRC = src
+WIN32 = src/win32
+MACROS = TRAFFICSIM_WIN32
+CFLAGS = -std=c++11
+INCLUDE = -I$(SRC)
+INCLUDE_WIN32 = -I$(WIN32)
+LIBS = -lopengl32 -lglu32 -lcomctl32 -mwindows
+ifdef MAKE_DEBUG
+
+PROGRAM = TrafficSimulatorDebug.exe
+OBJDIR = dobj
+COMPILE = g++ -c -g $(CFLAGS) $(INCLUDE) $(addprefix -D,$(MACROS))
+LINK = g++
+
+else
+
+PROGRAM = TrafficSimulator.exe
+OBJDIR = obj
+COMPILE = g++ -c -O3 $(CFLAGS) $(INCLUDE) $(addprefix -D,$(MACROS))
+LINK = g++ -s
+
+endif
+
+# targets
+TARGETS = trafficsim window simulation light intersection vehicle types control
+OBJS = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(TARGETS)))
+
+# dependencies
+TYPES_H = $(SRC)/types.h
+OPENGL_H = $(SRC)/opengl.h
+LIGHT_H = $(SRC)/light.h $(TYPES_H)
+INTERSECTION_H = $(TYPES_H) $(LIGHT_H)
+VEHICLE_H = $(SRC)/vehicle.h $(TYPES_H) $(INTERSECTION_H) $(LIGHT_H)
+SIMULATION_H = $(SRC)/simulation.h $(VEHICLE_H) $(INTERSECTION_H)
+CONTROL_H = $(WIN32)/control.h $(SIMULATION_H)
+WINDOW_H = $(WIN32)/window.h $(CONTROL_H) $(SIMULATION_H)
+
+# rules
+all: $(OBJDIR) $(PROGRAM)
+debug: $(OBJDIR) $(PROGRAM)
+
+$(PROGRAM): $(OBJS)
+	$(LINK) -o$@ $(OBJS) $(LIBS)
+
+$(OBJDIR)/trafficsim.o: $(SRC)/trafficsim.cpp $(WINDOW_H)
+	$(COMPILE) $(INCLUDE_WIN32) -o$@ $<
+$(OBJDIR)/window.o: $(WIN32)/window.cpp $(WINDOW_H)
+	$(COMPILE) $(INCLUDE_WIN32) -o$@ $<
+$(OBJDIR)/simulation.o: $(SRC)/simulation.cpp $(SIMULATION_H) $(OPENGL_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/light.o: $(SRC)/light.cpp $(LIGHT_H) $(OPENGL_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/intersection.o: $(SRC)/intersection.cpp $(INTERSECTION_H) $(OPENGL_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/vehicle.o: $(SRC)/vehicle.cpp $(VEHICLE_H) $(OPENGL_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/types.o: $(SRC)/types.cpp $(TYPES_H)
+	$(COMPILE) -o$@ $<
+$(OBJDIR)/control.o: $(WIN32)/control.cpp $(CONTROL_H)
+	$(COMPILE) $(INCLUDE_WIN32) -o$@ $<
+
+$(OBJDIR):
+	mkdir $(OBJDIR)

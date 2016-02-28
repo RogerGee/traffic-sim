@@ -76,6 +76,11 @@ void Control::get_size(int& w,int& h)
     w = bounds.right - bounds.left;
     h = bounds.bottom - bounds.top;
 }
+char* Control::get_text(char* buffer,size_t size)
+{
+    GetWindowText(get_hwnd(),buffer,(int)size);
+    return buffer;
+}
 void Control::set_text(const std::string& text,bool resize)
 {
     set_text_impl(get_hwnd(),text.c_str(),text.length(),resize);
