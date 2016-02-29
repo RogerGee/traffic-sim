@@ -15,6 +15,7 @@ namespace trafficsim
         intersection();
         void step();
         void draw();
+		bool isoutside(direction d, int p);
         light* getlight(direction d, int p);
         friend class simulation;
     private:

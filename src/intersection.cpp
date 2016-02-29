@@ -46,8 +46,25 @@ void intersection::draw()
     glEnd();
     glDisable(GL_LINE_STIPPLE);
     //tell lights to draw
-    ns_light.draw({loc.x-1,loc.y+1}, true);
-    ew_light.draw({loc.x+sz.width,loc.y-sz.height}, false);
+    ns_light.draw({loc.x+sz.width/2,loc.y-sz.height/2}, sz, north);
+    ew_light.draw({loc.x+sz.width/2,loc.y-sz.height/2}, sz, east);
+	ns_light.draw({loc.x+sz.width/2,loc.y-sz.height/2}, sz, south);
+    ew_light.draw({loc.x+sz.width/2,loc.y-sz.height/2}, sz, west);
+}
+
+bool intersection::isoutside(direction d, int p)
+{
+	switch (d)
+	{
+	case north:
+		return p > loc.y + 20;
+	case south:
+		return p < loc.y - sz.height - 20;
+	case east:
+		return p > loc.x + sz.width + 20;
+	case west:
+		return p < loc.x - 20;
+	}
 }
 
 light* intersection::getlight(direction d, int p)

@@ -54,7 +54,10 @@ bool vehicle::step(direction d, intersection& i, vehicle* next)
         tmWaitCycle = tmWait - tmWaitLast;
         tmWaitLast = tmWait;
     }
-    return (abs(*pp0) > 50);
+    int back = *pp0;
+	if (d == north) back -= length;
+	if (d == west) back += length;
+	return i.isoutside(d, back);
 }
 void vehicle::draw(direction d, float offs)
 {
