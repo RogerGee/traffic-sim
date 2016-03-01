@@ -19,7 +19,7 @@ simulation::simulation()
     : state(simul_state_stopped), stepTime(DEFAULT_STEP_TIME),
       steps(0), ticks(0), offset(0.0), spawnrate(DEFAULT_SPAWNRATE),
       elapsedTime(0.0), avgWaitTime(0.0), minWait(0.0), maxWait(0.0),
-      numCars(0), waitCars(0), curNumCars(0)
+      maxWaitLine(0), numCars(0), waitCars(0), curNumCars(0)
 {
     srand(time(NULL));
 }
@@ -88,6 +88,8 @@ float simulation::get_statistic(simul_statistic stat) const
         return minWait;
     case simul_stat_high_wait_time:
         return maxWait;
+    case simul_stat_max_wait_line:
+        return maxWaitLine;
     case simul_stat_mean_cars_waiting:
         if (steps == 0)
             return 0.0;
@@ -171,11 +173,12 @@ void simulation::addcar(direction d, int l, color c)
 void simulation::stats_eval(float tm)
 {
     // evaluate stats; this is called once per tick
-    int p = 0;
+    int p = 0, q = 0;
     elapsedTime += tm;
     avgWaitTime = 0.0;
     curNumCars = 0;
     for (int i = 0;i < 4;++i) {
+        int r = 0;
         for (auto& car : cars[i]) {
             float t = car.get_cycle_wait_time();
             if (t != 0.0 && (t < minWait || minWait == 0.0))
@@ -183,14 +186,20 @@ void simulation::stats_eval(float tm)
             if (t > maxWait)
                 maxWait = t;
             avgWaitTime += car.get_wait_time();
-            p += car.is_waiting();
+            r += car.is_waiting(); // count how many are waiting in each lane
             curNumCars += 1;
         }
+        p += r;
+        if (r > q)
+            q = r; // find max waiting cars of any lane
     }
     if (curNumCars > 0)
         avgWaitTime /= curNumCars;
-    if (offset == 0.0)
+    if (offset == 0.0) {
         waitCars += p;
+        if (q > maxWaitLine)
+            maxWaitLine = q;
+    }
 }
 void simulation::reset()
 {

@@ -21,6 +21,7 @@ namespace trafficsim
         simul_stat_mean_wait_time,
         simul_stat_low_wait_time,
         simul_stat_high_wait_time,
+        simul_stat_max_wait_line,
         simul_stat_mean_cars_waiting,
         simul_stat_number_of_cars,
         simul_stat_total_number_of_cars
@@ -65,6 +66,7 @@ namespace trafficsim
         float avgWaitTime; // current average wait time
         float minWait; // shortest wait time seen for any car
         float maxWait; // longest wait time seen for any car
+        int maxWaitLine; // longest wait line seen so far
         int numCars; // total cars having been in simulation (updated per step)
         int waitCars; // cars having waited (updated per step)
         int curNumCars; // current number of cars in simulation

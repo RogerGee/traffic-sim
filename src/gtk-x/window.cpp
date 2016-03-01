@@ -55,6 +55,7 @@ window::window(GtkApplication* app,int wid)
     dispAvgWaitTime = gtk_label_new("0.0");
     dispLowWaitTime = gtk_label_new("0.0");
     dispHighWaitTime = gtk_label_new("0.0");
+    dispMaxWaitLine = gtk_label_new("0");
     dispAvgWaitCars = gtk_label_new("0.0");
     dispNumberOfCars = gtk_label_new("0");
     dispTotalCars = gtk_label_new("0");
@@ -80,13 +81,15 @@ window::window(GtkApplication* app,int wid)
     gtk_grid_attach(grid,dispLowWaitTime,1,2,1,1);
     gtk_grid_attach(grid,gtk_label_new("High Wait Time:"),0,3,1,1);
     gtk_grid_attach(grid,dispHighWaitTime,1,3,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Mean Cars Waiting:"),0,4,1,1);
-    gtk_grid_attach(grid,dispAvgWaitCars,1,4,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Number of Cars:"),0,5,1,1);
-    gtk_grid_attach(grid,dispNumberOfCars,1,5,1,1);
-    gtk_grid_attach(grid,gtk_label_new("Total Cars Generated:"),0,6,1,1);
-    gtk_grid_attach(grid,dispTotalCars,1,6,1,1);
-    adjust_grid_children(grid,2,7);
+    gtk_grid_attach(grid,gtk_label_new("Max Wait Line:"),0,4,1,1);
+    gtk_grid_attach(grid,dispMaxWaitLine,1,4,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Mean Cars Waiting:"),0,5,1,1);
+    gtk_grid_attach(grid,dispAvgWaitCars,1,5,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Number of Cars:"),0,6,1,1);
+    gtk_grid_attach(grid,dispNumberOfCars,1,6,1,1);
+    gtk_grid_attach(grid,gtk_label_new("Total Cars Generated:"),0,7,1,1);
+    gtk_grid_attach(grid,dispTotalCars,1,7,1,1);
+    adjust_grid_children(grid,2,8);
     gtk_widget_set_double_buffered(drawingArea,false);
     gtk_box_pack_start(GTK_BOX(drawBox),drawingArea,TRUE,TRUE,0);
     gtk_box_pack_start(GTK_BOX(controlBox),gtk_label_new("Control Panel"),TRUE,FALSE,0);
@@ -168,6 +171,8 @@ void window::update_stats()
     gtk_label_set_text(GTK_LABEL(dispLowWaitTime),ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_high_wait_time);
     gtk_label_set_text(GTK_LABEL(dispHighWaitTime),ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_max_wait_line));
+    gtk_label_set_text(GTK_LABEL(dispMaxWaitLine),ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_mean_cars_waiting);
     gtk_label_set_text(GTK_LABEL(dispAvgWaitCars),ss.str().c_str());
     ss.str(""); ss << int(sim.get_statistic(simul_stat_number_of_cars));
@@ -186,6 +191,7 @@ void window::reset_stats()
     gtk_label_set_text(GTK_LABEL(dispAvgWaitTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispLowWaitTime),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispHighWaitTime),def.c_str());
+    gtk_label_set_text(GTK_LABEL(dispMaxWaitLine),"0");
     gtk_label_set_text(GTK_LABEL(dispAvgWaitCars),def.c_str());
     gtk_label_set_text(GTK_LABEL(dispNumberOfCars),"0");
     gtk_label_set_text(GTK_LABEL(dispTotalCars),"0");

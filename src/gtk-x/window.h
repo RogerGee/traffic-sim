@@ -35,6 +35,7 @@ namespace gui
         GtkWidget* dispAvgWaitTime;
         GtkWidget* dispLowWaitTime;
         GtkWidget* dispHighWaitTime;
+        GtkWidget* dispMaxWaitLine;
         GtkWidget* dispAvgWaitCars;
         GtkWidget* dispNumberOfCars;
         GtkWidget* dispTotalCars;
