@@ -40,7 +40,7 @@ void light::draw(point pos, size sz, direction d)
     {
     case light_state_green:
         glColor3f(0,0.8,0);
-		y = 0;
+		y = 2;
         break;
     case light_state_yellow:
         glColor3f(1,1,0);
@@ -48,7 +48,7 @@ void light::draw(point pos, size sz, direction d)
         break;
     case light_state_red:
         glColor3f(1,0,0);
-		y = 2;
+		y = 0;
         break;
     }
     glBegin(GL_POLYGON);
