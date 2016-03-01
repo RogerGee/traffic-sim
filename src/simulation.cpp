@@ -212,6 +212,14 @@ void simulation::reset()
     spawnrate = DEFAULT_SPAWNRATE;
     intr.ns_light.update_rate(light::DEFAULT_LIGHTSPEED());
     intr.ew_light.update_rate(light::DEFAULT_LIGHTSPEED());
+    elapsedTime = 0.0;
+    avgWaitTime = 0.0;
+    minWait = 0.0;
+    maxWait = 0.0;
+    maxWaitLine = 0;
+    numCars = 0;
+    waitCars = 0;
+    curNumCars = 0;
 }
 void simulation::render()
 {
