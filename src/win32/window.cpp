@@ -24,7 +24,8 @@ using namespace trafficsim;
     steady_clock::time_point cur_t = steady_clock::now();
 
     while (win.update(duration_cast<duration<double>>(cur_t-prev_t).count())) {
-        this_thread::sleep_for(milliseconds(4));
+        //this_thread::sleep_for(milliseconds(4));
+        Sleep(4);
         prev_t = cur_t;
         cur_t = steady_clock::now();
     }
@@ -41,7 +42,8 @@ window::window()
         barLightSpeed(this,&window::ontrack_lightspeed,10,20), b3("Light Speed:"), l1("Total Elapsed Time:"),
         lblTotalTime("0.0"), l2("Mean Wait Time"), lblAvgWaitTime("0.0"), l3("Low Wait Time"), lblLowWaitTime("0.0"),
         l4("High Wait Time:"), lblHighWaitTime("0.0"), l5("Mean Cars Waiting:"), lblAvgWaitCars("0.0"),
-        l6("Number of Cars:"), lblNumberOfCars("0"), l7("Total Cars Generated:"), lblTotalCars("0")
+        l6("Number of Cars:"), lblNumberOfCars("0"), l7("Total Cars Generated:"), lblTotalCars("0"),
+        l8("Max Wait Line:"), lblMaxWaitLine("0")
 {
     RECT winrect;
     DWORD dwStyle;
@@ -173,6 +175,9 @@ void window::config()
     l4.change(w,s);
     lblHighWaitTime.change(w+u,s);
     s += t;
+    l8.change(w,s);
+    lblMaxWaitLine.change(w+u,s);
+    s += t;
     l5.change(w,s);
     lblAvgWaitCars.change(w+u,s);
     s += t;
@@ -250,6 +255,8 @@ void window::update_stats()
     lblLowWaitTime.set_text(ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_high_wait_time);
     lblHighWaitTime.set_text(ss.str().c_str());
+    ss.str(""); ss << int(sim.get_statistic(simul_stat_max_wait_line));
+    lblMaxWaitLine.set_text(ss.str().c_str());
     ss.str(""); ss << sim.get_statistic(simul_stat_mean_cars_waiting);
     lblAvgWaitCars.set_text(ss.str().c_str());
     ss.str(""); ss << int(sim.get_statistic(simul_stat_number_of_cars));
@@ -268,9 +275,10 @@ void window::reset_stats()
     lblAvgWaitTime.set_text(def.c_str());
     lblLowWaitTime.set_text(def.c_str());
     lblHighWaitTime.set_text(def.c_str());
+    lblMaxWaitLine.set_text("0");
     lblAvgWaitCars.set_text(def.c_str());
-    lblNumberOfCars.set_text(def.c_str());
-    lblTotalCars.set_text(def.c_str());
+    lblNumberOfCars.set_text("0");
+    lblTotalCars.set_text("0");
 }
 /*static*/ VOID window::RegisterWndClass(HINSTANCE hInst)
 {
@@ -291,7 +299,7 @@ void window::reset_stats()
 /*static*/ LRESULT CALLBACK window::WindowProc(HWND hWnd,UINT msg,
                                         WPARAM wParam,LPARAM lParam)
 {
-    static const array<Control*,24> a = {
+    static const array<Control*,26> a = {
         &singleton->drawArea, &singleton->lblControlPanel, &singleton->btnSimul,
         &singleton->btnPause, &singleton->barSimulSpeed, &singleton->b1,
         &singleton->barSpawnRate, &singleton->b2, &singleton->barLightSpeed,
@@ -299,7 +307,8 @@ void window::reset_stats()
         &singleton->lblAvgWaitTime, &singleton->l3, &singleton->lblLowWaitTime,
         &singleton->l4, &singleton->lblHighWaitTime, &singleton->l5,
         &singleton->lblAvgWaitCars, &singleton->l6, &singleton->lblNumberOfCars,
-        &singleton->l7, &singleton->lblTotalCars
+        &singleton->l7, &singleton->lblTotalCars, &singleton->l8,
+        &singleton->lblMaxWaitLine
     };
 
     switch (msg) {

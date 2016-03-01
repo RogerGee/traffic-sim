@@ -49,8 +49,11 @@ WINDOW_H = $(WIN32)/window.h $(CONTROL_H) $(SIMULATION_H)
 all: $(OBJDIR) $(PROGRAM)
 debug: $(OBJDIR) $(PROGRAM)
 
-$(PROGRAM): $(OBJS)
-	$(LINK) -o$@ $(OBJS) $(LIBS)
+$(PROGRAM): $(OBJS) resources.res
+	$(LINK) -o$@ $(OBJS) resources.res $(LIBS)
+
+resources.res: resources.rc
+	windres resources.rc -o resources.res --output-format=coff
 
 $(OBJDIR)/trafficsim.o: $(SRC)/trafficsim.cpp $(WINDOW_H)
 	$(COMPILE) $(INCLUDE_WIN32) -o$@ $<

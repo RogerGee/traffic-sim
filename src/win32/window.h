@@ -30,6 +30,7 @@ namespace gui
         Label l5; Label lblAvgWaitCars;
         Label l6; Label lblNumberOfCars;
         Label l7; Label lblTotalCars;
+        Label l8; Label lblMaxWaitLine;
 
         bool update(float tout);
         bool message();
