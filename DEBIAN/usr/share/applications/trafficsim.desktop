@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=TrafficSim
+Comment=A simple, graphical traffic simulator
+GenericName=Traffic Simulator
+Exec=/usr/bin/trafficsim
+Icon=/usr/share/icons/trafficsim.png
+Type=Application
+StartupNotify=true
+Categories=GNOME;GTK
+MimeType=text/plain;

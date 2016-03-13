@@ -1,7 +1,7 @@
 ################################################################################
 # Makefile for 'traffic-sim' for Gtk/X #########################################
 ################################################################################
-.PHONY: debug clean
+.PHONY: debug clean package
 
 ifeq ($(MAKECMDGOALS),debug)
 MAKE_DEBUG = yes
@@ -68,3 +68,7 @@ $(OBJDIR)/types.o: $(SRC)/types.cpp $(TYPES_H)
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
+
+package: $(PROGRAM)
+	@cp --verbose $(PROGRAM) DEBIAN/usr/bin
+	@dpkg-deb --build DEBIAN .

@@ -1,0 +1,6 @@
+Package: trafficsim
+Version: 1.0
+Maintainer: Roger Gee <rpg11a@acu.edu>
+Description: A simple, graphical traffic simulator
+Architecture: amd64
+Depends: libglu1-mesa, libgtk-3-0, libgl1-mesa-glx

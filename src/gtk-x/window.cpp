@@ -115,6 +115,11 @@ window::window(GtkApplication* app,int wid)
     gtk_container_add(GTK_CONTAINER(frame),box);
     gtk_application_add_window(app,GTK_WINDOW(frame));
 
+    // load icon from static location in filesystem; let this operation silently
+    // fail since we don't care if the icon doesn't load
+    GError* iconErr;
+    gtk_window_set_icon_from_file(GTK_WINDOW(frame),"/usr/share/icons/trafficsim.png",&iconErr);
+
     // create OpenGL context for use with the drawing area
     context = glXCreateContext(display,visual,None,True);
     if (context == NULL)
